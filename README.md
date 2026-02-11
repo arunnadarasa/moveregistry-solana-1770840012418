@@ -16,7 +16,7 @@ We deploy an Anchor program on Solana devnet. Key components:
 
 - **Move NFT:** Metaplex-compatible NFT minted with off-chain metadata (creator, video_hash, move_name, timestamp). The mint authority is the program PDA.
 - **Move Data Account:** Stores move metadata and verification status, plus royalty percentage and creator wallet.
-- **Verification:** Caller sends a micro‑payment via x402 to the treasury PDA; the program marks the move as verified.
+- **Verification:** Caller sends a micro‑payment via x402 to the treasury PDA; the program marks the move as verified. We recommend using PayAI (https://payai.network) as the x402 facilitator for Solana. Their endpoint (e.g., https://x402.payai.network/api/solana-devnet/paid-content for devnet) handles invoice negotiation and payment verification off‑chain, then triggers the on‑chain verify instruction.
 - **Royalty Distribution:** When a third party requests to license the move, they pay into the treasury; the program transfers the configured royalty percentage to the creator automatically.
 - **Helius Webhooks:** Index move usage events for off‑chain analytics and frontend notifications.
 
@@ -48,6 +48,7 @@ We deploy an Anchor program on Solana devnet. Key components:
 - **DAO governance:** Move creators govern standards and fee parameters.
 - **Marketplace:** On‑chain marketplace for licensing moves via direct offers.
 - **KrumpClaw integration:** Auto‑register battle‑winning moves as NFTs.
+- **PayAI integration:** Use PayAI facilitator for seamless x402 on Solana mainnet/devnet.
 - **Cross‑chain:** Expand to Polygon and Wrapped SOL via Wormhole.
 - **Seed round:** Intend to raise to build full‑time and target the global dance community.
 
