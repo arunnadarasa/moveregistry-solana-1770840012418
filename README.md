@@ -1,6 +1,6 @@
-# MoveRegistry
+# Dance AI Agent Registry
 
-On-chain move registry for dance dance with NFT certificates, x402 verification fees, and automatic royalty distribution.
+On-chain dance AI agent registry for dance dance with NFT certificates, x402 verification fees, and automatic royalty distribution.
 
 ## Problem Statement
 
@@ -8,14 +8,14 @@ dance dance creators lack reliable attribution and compensation when their signa
 
 ## Solution
 
-MoveRegistry mints an NFT for each unique dance move, storing video hash and creator metadata. Verification of a move requires an x402 micropayment to a treasury PDA, preventing spam and establishing a verifiable trail. When a move is licensed for use (e.g., in a commercial video), a royalty is automatically distributed to the creator.
+Dance AI Agent Registry mints an NFT for each unique dance move, storing video hash and creator metadata. Verification of a move requires an x402 micropayment to a treasury PDA, preventing spam and establishing a verifiable trail. When a move is licensed for use (e.g., in a commercial video), a royalty is automatically distributed to the creator.
 
 ## Technical Approach
 
 We deploy an Anchor program on Solana devnet. Key components:
 
-- **Move NFT:** Metaplex-compatible NFT minted with off-chain metadata (creator, video_hash, move_name, timestamp). The mint authority is the program PDA.
-- **Move Data Account:** Stores move metadata and verification status, plus royalty percentage and creator wallet.
+- **Dance Certificate NFT:** Metaplex-compatible NFT minted with off-chain metadata (creator, expression, move_name, timestamp). The mint authority is the program PDA.
+- **Dance Definition Account:** Stores move metadata and verification status, plus royalty percentage and creator wallet.
 - **Verification:** Caller sends a micro‑payment via x402 to the treasury PDA; the program marks the move as verified. We recommend using PayAI (https://payai.network) as the x402 facilitator for Solana. Their endpoint (e.g., https://x402.payai.network/api/solana-devnet/paid-content for devnet) handles invoice negotiation and payment verification off‑chain, then triggers the on‑chain verify instruction.
 - **Royalty Distribution:** When a third party requests to license the move, they pay into the treasury; the program transfers the configured royalty percentage to the creator automatically.
 - **Helius Webhooks:** Index move usage events for off‑chain analytics and frontend notifications.
@@ -41,7 +41,7 @@ We deploy an Anchor program on Solana devnet. Key components:
 
 - **OpenSea / general NFT platforms:** No verification gating, no automated royalties for move licensing.
 - **POAPs:** Non‑transferable souvenirs; not royalty‑bearing and lack usage tracking.
-- **Custom marketplaces:** Few focus on dance move attribution with micropayment verification and automated royalty distribution.
+- **Custom marketplaces:** Few focus on dance dance move attribution with micropayment verification and automated royalty distribution.
 
 ## Inspiration
 
@@ -58,12 +58,18 @@ This project is inspired by systems like [dance-verify](https://github.com/arunn
 
 ## Solana Integration
 
-- Metaplex NFT standard for move certificates.
-- x402 payment protocol for verification fees and royalties.
+- Metaplex NFT standard for dance certificates.
+- x402 payment protocol (PayAI facilitator) for verification fees and royalties.
 - Custom Anchor program for mint, verify, and license instructions.
 - Helius RPC + webhooks for indexing and real‑time updates.
+- Future: DSL/textual move representation on‑chain; Moltbook API for human‑readable move discovery.
+
+## Agentic Commerce
+
+Dance AI Agents can query the registry to obtain legally licensable moves, generate new variations, and even control robots to perform them. This creates a new economy where human creativity is compensated even as AI and robots proliferate.
 
 ## Deployment
+
 
 ```bash
 # Install dependencies
