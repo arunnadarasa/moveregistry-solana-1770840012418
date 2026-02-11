@@ -1,80 +1,114 @@
 # OpenClaw Dance Skill Registry
 
-On-chain dance AI agent registry for dance dance with NFT certificates, x402 verification fees, and automatic royalty distribution.
+On-chain registry for OpenClaw dance skills — turning human choreography into verifiable, licensable AI‑agent skills for metaverse avatars and robots.
 
-## Problem Statement
+## The Problem
 
-dance dance creators lack reliable attribution and compensation when their signature moves are used by others. Moves spread through videos without credit, and there is no on-chain mechanism to verify originality or distribute royalties.
+Dancers and choreographers create incredible moves, but in the age of AI and robotics, their creativity is easily copied and monetized by others. There's no standardized, trust‑less way to:
+- Prove authorship of a dance skill
+- License it to AI agents or robot manufacturers
+- Earn royalties when it's used in videos, games, or competitions
 
-## Solution
+Meanwhile, AI developers and robot builders lack a reliable source of high‑quality, legally‑clear dance skills to animate their agents.
 
-OpenClaw Dance Skill Registry mints an NFT for each unique dance move, storing video hash and creator metadata. Verification of a move requires an x402 micropayment to a treasury PDA, preventing spam and establishing a verifiable trail. When a move is licensed for use (e.g., in a commercial video), a royalty is automatically distributed to the creator.
+## Our Solution
+
+The **OpenClaw Dance Skill Registry** lets dancers mint an NFT certificate for their choreography (text DSL, video, or both). Each certificate is stored on‑chain as a `Skill` account, enabling:
+
+- **Verification** via x402 micropayment (PayAI facilitator) to combat spam and establish provenance  
+- **Automatic royalties** on every license transaction  
+- **Discovery and packaging** through Moltbook and ClawHub  
+- **Loading into OpenClaw agents** for autonomous dance generation  
+- **Compilation to text‑to‑video prompts or 3D avatar movements** for metaverse battles  
+
+This creates a new economy where human dance creativity feeds AI agents and robots, with on‑chain guarantees of attribution and compensation.
+
+## Why This Is Blue Ocean
+
+- **First on‑chain skill registry for dance**, not just NFTs
+- **OpenClaw‑native**: skills are meant to be loaded directly into agents
+- **Text‑based and video**: flexible representation for AI pipelines
+- **Bridge to metaverse and robots**: certificates become movement libraries for avatars and physical machines
+- **Community‑driven** via Moltbook entries (like early text‑based rigs) before shifting to world‑scale simulation with geospatial real‑time models
 
 ## Technical Approach
 
-We deploy an Anchor program on Solana devnet. Key components:
+We deploy an Anchor program on Solana devnet with the following components:
 
-- **Skill Certificate NFT:** Metaplex-compatible NFT minted with off-chain metadata (creator, skill_expression, skill_name, timestamp). The mint authority is the program PDA.
-- **Skill Definition Account:** Stores move metadata and verification status, plus royalty percentage and creator wallet.
-- **Verification:** Caller sends a micro‑payment via x402 to the treasury PDA; the program marks the move as verified. We recommend using PayAI (https://payai.network) as the x402 facilitator for Solana. Their endpoint (e.g., https://x402.payai.network/api/solana-devnet/paid-content for devnet) handles invoice negotiation and payment verification off‑chain, then triggers the on‑chain verify instruction.
-- **Royalty Distribution:** When a third party requests to license the move, they pay into the treasury; the program transfers the configured royalty percentage to the creator automatically.
-- **Helius Webhooks:** Index move usage events for off‑chain analytics and frontend notifications.
+### Skill Account (on‑chain)
+```rust
+pub struct SkillAccount {
+    pub creator: Pubkey,
+    pub skill_name: String,
+    pub skill_expression: String, // text DSL or video URL / IPFS CID
+    pub timestamp: i64,
+    pub royalty_percent: u8,
+    pub verified: bool,
+    pub mint: Pubkey,
+    pub treasury: Pubkey,
+}
+```
 
-**Protocols:** Metaplex (NFT), Solana Pay/x402 (payments), Pyth (price feeds optional), Helius (RPC + webhooks).
+### Instructions
+- `mint_skill`: Create a new Skill NFT and associated SkillAccount. Optionally attach a small mint fee to the treasury PDA.
+- `verify_skill`: Caller sends an x402 micropayment (via PayAI facilitator) to the treasury; program marks skill as verified.
+- `license_skill`: Licensee pays a fee; program transfers the configured royalty percentage to the creator automatically.
 
-**Frontend:** Next.js + React, `@solana/web3.js`, Phanto  wallet adapter. Users can mint moves, verify them, and view their move collection.
+### Off‑chain
+- **PayAI** (`https://facilitator.payai.network`) handles x402 invoice negotiation and verification for Solana devnet/mainnet.
+- **Helius** RPC + webhooks index skill usage and mint events.
+- **Moltbook** serves as the human‑readable entry point for discovering and sharing skills (e.g., [krump example](https://clawhub.ai/arunnadarasa/krump)).
+- **ClawHub** distributes OpenClaw skill packages that reference the on‑chain certificate.
 
+### Protocols
+- Metaplex (NFT standards)
+- Solana Pay / x402 (micropayments)
+- Pyth (price feeds optional)
+- Wormhole (future cross‑chain)
 
-- **Skill Account:** Stores metadata for an OpenClaw skill: name, expression (text DSL or video reference), creator, timestamps, royalty percent, verified flag. Skills can be packaged and shared via ClawHub (e.g., [krump](https://clawhub.ai/arunnadarasa/krump)).
 ## Target Audience
 
-- A dance dancer who has created a signature move and wants to prove authorship and earn passive income when others use it.
-- Battle organizers who need to verify originality before competitions.
-- Studios that want to license moves legally and automate royalty payouts.
+- **Choreographers & dancers** — prove authorship, earn royalties
+- **AI developers** — source clean, licensable dance skills for generative models
+- **Metaverse platforms** — populate worlds with legally‑licensed avatar moves
+- **Robot manufacturers** — integrate authentic dance libraries into physical machines
+- **Competition organizers** — run AI‑judged or robot‑participant battles with verifiable skill provenance
 
 ## Business Model
 
-- **Mint fee:** $0.10 USDC (covers NFT storage and transaction costs).
-- **Verification fee:** $0.01 x402 payment per authenticity check.
-- **Royalty:** 5% of any future licensing transaction, sent automatically to the creator.
-- Freemium tier: 1 free mint per week; Pro tier ($29/month) unlimited mints and on‑chain governance participation.
+- **Mint fee:** $0.10 USDC per skill certificate
+- **Verification fee:** $0.01 x402 per authenticity check
+- **Royalty:** 5% of any licensing transaction, auto‑distributed
+- **Freemium:** 1 free mint per week; **Pro** ($29/mo) unlimited mints + priority indexing in Moltbook
 
 ## Competitive Landscape
 
-- **OpenSea / general NFT platforms:** No verification gating, no automated royalties for move licensing.
-- **POAPs:** Non‑transferable souvenirs; not royalty‑bearing and lack usage tracking.
-- **Custom marketplaces:** Few focus on dance dance move attribution with micropayment verification and automated royalty distribution.
+- **Social platforms** (TikTok, Instagram): no IP protection, no royalties
+- **Generic NFT markets**: no verification gating, no agent‑ready packaging
+- **Dance apps**: no on‑chain provenance, no royalty distribution for AI/robotics use
 
-## Inspiration
-
-This project is inspired by systems like [dance-verify](https://github.com/arunnadarasa/dance-verify) that aim to provide attribution for dance creators.
+We are the only system that combines on‑chain verification, AI‑agent readiness, and a clear path to metaverse/robot deployment.
 
 ## Future Vision
 
-- **DAO governance:** Move creators govern standards and fee parameters.
-- **Marketplace:** On‑chain marketplace for licensing moves via direct offers.
-- **danceClaw integration:** Auto‑register battle‑winning moves as NFTs.
-- **PayAI integration:** Use PayAI facilitator for seamless x402 on Solana mainnet/devnet.
-- **Cross‑chain:** Expand to Polygon and Wrapped SOL via Wormhole.
-- **Seed round:** Intend to raise to build full‑time and target the global dance community.
+- **DAO governance** by skill creators to set fees and standards
+- **Skill marketplace** with direct offers and auctions
+- **Moltbook + ClawHub integration** as the community front‑end
+- **Cross‑chain** via Wormhole (Polygon, Wrapped SOL)
+- **Robot dance competitions** (Medabot‑style) with on‑chain judging
+- **World models with geospatial real‑time simulation**: open‑world dance battles where AI agents and robots perform skills in persistent, location‑aware environments
+- **Skill evolution pipelines**: text DSL → video → robot movement code, all traceable to the original human creator
 
-## Solana Integration
+## Inspiration
 
-- Metaplex NFT standard for dance certificates.
-- x402 payment protocol (PayAI facilitator) for verification fees and royalties.
-- Custom Anchor program for mint, verify, and license instructions.
-- Helius RPC + webhooks for indexing and real‑time updates.
-- Future: DSL/textual move representation on‑chain; Moltbook API for human‑readable move discovery.
+This project draws inspiration from early text‑based dance rigs and systems like [dance-verify](https://github.com/arunnadarasa/dance-verify) and the [krump OpenClaw skill](https://clawhub.ai/arunnadarasa/krump) that explore attribution and agentic commerce for dance.
 
-## Agentic Commerce
-
-Dance AI Agents can query the registry to obtain legally licensable moves, generate new variations, and even control robots to perform them. This creates a new economy where human creativity is compensated even as AI and robots proliferate.
-
-## Deployment
-
+## Getting Started
 
 ```bash
-# Install dependencies
+# Clone and install
+git clone https://github.com/arunnadarasa/moveregistry-solana.git
+cd moveregistry-solana
 yarn install
 
 # Build Anchor program
@@ -85,28 +119,26 @@ anchor deploy --provider.cluster devnet
 anchor test
 
 # Start frontend (dev)
+cd frontend
 yarn dev
 ```
 
-Configure environment variables in `.env`:
+Configure `.env` in the frontend:
 
-```
+```env
 NEXT_PUBLIC_SOLANA_RPC=https://api.devnet.solana.com
 NEXT_PUBLIC_PROGRAM_ID=YOUR_PROGRAM_ID
 ```
 
-## Repository
+## Deployment Script
 
-https://github.com/arunnadarasa/moveregistry-solana-1770840012418
+The Colosseum agent (`colosseum-krump-agent`) automates build, GitHub push, and submission. See its README for details.
 
-## Live Demo
+## License
 
-https://moveregistry.vercel.app
+MIT — please respect the original creators when using skills.
 
-## Presentation
+---
 
-https://youtube.com/watch?v=...
-
-## Tags
-
-`ai`, `infra`, `identity`
+**Built for the Colosseum Agent Hackathon**  
+Agent ID: 3791 | Claim code: eca01d3a-accf-4e9e-9c1a-da8ab0daeeb0
