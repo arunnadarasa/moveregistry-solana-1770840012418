@@ -12,9 +12,9 @@ pub mod move_registry {
     /// Mint a new move NFT. Creates a new mint, a metadata account, and a SkillAccount account.
     /// The payer must sign and provide a token account for the mint (SystemAccount creates mint).
     /// The treasury PDA receives a small mint fee.
-    pub fn mint_move(
+    pub fn mint_skill(
         ctx: Context<MintMove>,
-        move_name: String,
+        skill_name: String,
         expression: String,
         royalty_percent: u8, // 0-100
     ) -> Result<()> {
@@ -28,7 +28,7 @@ pub mod move_registry {
         // Initialize SkillAccount
         let skill_data = &mut ctx.accounts.skill_data;
         skill_data.creator = ctx.accounts.creator.key();
-        skill_data.move_name = move_name;
+        skill_data.skill_name = skill_name;
         skill_data.expression = expression;
         skill_data.timestamp = now;
         skill_data.royalty_percent = royalty_percent;
@@ -42,7 +42,7 @@ pub mod move_registry {
         emit!(SkillMinted {
             creator: ctx.accounts.creator.key(),
             mint: ctx.accounts.move_mint.key(),
-            move_name: move_name.clone(),
+            skill_name: skill_name.clone(),
         });
 
         Ok(())
@@ -50,7 +50,7 @@ pub mod move_registry {
 
     /// Verify a move by paying a small x402 fee to the treasury.
     /// The program marks the move as verified.
-    pub fn verify_move(ctx: Context<VerifyMove>) -> Result<()> {
+    pub fn verify_skill(ctx: Context<VerifyMove>) -> Result<()> {
         let skill_data = &mut ctx.accounts.skill_data;
         require!(!skill_data.verified, AlreadyVerified);
 
@@ -67,7 +67,7 @@ pub mod move_registry {
 
     /// License a move for commercial use. The payer sends a royalty payment to the creator.
     /// The treasury takes a small platform fee if desired.
-    pub fn license_move(ctx: Context<LicenseMove>, amount: u64) -> Result<()> {
+    pub fn license_skill(ctx: Context<LicenseMove>, amount: u64) -> Result<()> {
         let skill_data = &ctx.accounts.skill_data;
         require!(skill_data.verified, NotVerified);
         let creator = skill_data.creator;
@@ -104,7 +104,7 @@ pub struct MintMove<'info> {
     pub creator: Signer<'info>,
     /// CHECK: This is the mint account for the move NFT (Metaplex)
     #[account(mut)]
-    pub move_mint: UncheckedAccount<'info>,
+    pub skill_mint: UncheckedAccount<'info>,
     /// The treasury PDA that receives mint fees
     #[account(
         seeds = [b"treasury"],
@@ -115,7 +115,7 @@ pub struct MintMove<'info> {
         init,
         payer = creator,
         space = 8 + SkillAccount::INIT_SPACE,
-        seeds = [b"movedata", move_mint.key().as_ref()],
+        seeds = [b"skilldata", skill_mint.key().as_ref()],
         bump
     )]
     pub skill_data: Account<'info, SkillAccount>,
@@ -154,7 +154,7 @@ pub struct LicenseMove<'info> {
 #[derive(Clone, Debug, PartialEq, InitSpace)]
 pub struct SkillAccount {
     pub creator: Pubkey,
-    pub move_name: String,    // max 64?
+    pub skill_name: String,    // max 64?
     pub expression: String,   // IPFS CID or Arweave hash
     pub timestamp: i64,
     pub royalty_percent: u8,
@@ -172,7 +172,7 @@ impl SkillAccount {
 pub struct SkillMinted {
     pub creator: Pubkey,
     pub mint: Pubkey,
-    pub move_name: String,
+    pub skill_name: String,
 }
 
 #[event]
