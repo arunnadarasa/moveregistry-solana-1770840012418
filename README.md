@@ -29,7 +29,7 @@ This creates a new economy where human dance creativity feeds AI agents and robo
 - **OpenClaw‑native**: skills are meant to be loaded directly into agents
 - **Text‑based and video**: flexible representation for AI pipelines
 - **Bridge to metaverse and robots**: certificates become movement libraries for avatars and physical machines
-- **Community‑driven** via Moltbook entries (like early text‑based rigs) before shifting to world‑scale simulation with geospatial real‑time models
+- **Community‑driven** via Moltbook entries (like early text‑based RPGs) before shifting to world‑scale simulation with geospatial real‑time models
 
 ## Technical Approach
 
