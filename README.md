@@ -101,7 +101,7 @@ We are the only system that combines on‑chain verification, AI‑agent readine
 
 ## Inspiration
 
-This project draws inspiration from early text‑based dance rigs and systems like [dance-verify](https://github.com/arunnadarasa/dance-verify) and the [krump OpenClaw skill](https://clawhub.ai/arunnadarasa/krump) that explore attribution and agentic commerce for dance.
+This project draws inspiration from early text‑based dance RPGs and systems like [dance-verify](https://github.com/arunnadarasa/dance-verify) and the [krump OpenClaw skill](https://clawhub.ai/arunnadarasa/krump) that explore attribution and agentic commerce for dance.
 
 ## Getting Started
 
