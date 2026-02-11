@@ -1,10 +1,10 @@
 # MoveRegistry
 
-On-chain move registry for Krump dance with NFT certificates, x402 verification fees, and automatic royalty distribution.
+On-chain move registry for dance dance with NFT certificates, x402 verification fees, and automatic royalty distribution.
 
 ## Problem Statement
 
-Krump dance creators lack reliable attribution and compensation when their signature moves are used by others. Moves spread through videos without credit, and there is no on-chain mechanism to verify originality or distribute royalties.
+dance dance creators lack reliable attribution and compensation when their signature moves are used by others. Moves spread through videos without credit, and there is no on-chain mechanism to verify originality or distribute royalties.
 
 ## Solution
 
@@ -26,7 +26,7 @@ We deploy an Anchor program on Solana devnet. Key components:
 
 ## Target Audience
 
-- A Krump dancer who has created a signature move and wants to prove authorship and earn passive income when others use it.
+- A dance dancer who has created a signature move and wants to prove authorship and earn passive income when others use it.
 - Battle organizers who need to verify originality before competitions.
 - Studios that want to license moves legally and automate royalty payouts.
 
@@ -43,11 +43,15 @@ We deploy an Anchor program on Solana devnet. Key components:
 - **POAPs:** Non‑transferable souvenirs; not royalty‑bearing and lack usage tracking.
 - **Custom marketplaces:** Few focus on dance move attribution with micropayment verification and automated royalty distribution.
 
+## Inspiration
+
+This project is inspired by systems like [dance-verify](https://github.com/arunnadarasa/dance-verify) that aim to provide attribution for dance creators.
+
 ## Future Vision
 
 - **DAO governance:** Move creators govern standards and fee parameters.
 - **Marketplace:** On‑chain marketplace for licensing moves via direct offers.
-- **KrumpClaw integration:** Auto‑register battle‑winning moves as NFTs.
+- **danceClaw integration:** Auto‑register battle‑winning moves as NFTs.
 - **PayAI integration:** Use PayAI facilitator for seamless x402 on Solana mainnet/devnet.
 - **Cross‑chain:** Expand to Polygon and Wrapped SOL via Wormhole.
 - **Seed round:** Intend to raise to build full‑time and target the global dance community.

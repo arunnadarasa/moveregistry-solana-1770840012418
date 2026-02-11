@@ -47,7 +47,7 @@ export default function MoveMint() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>MoveRegistry — Mint Your Krump Move</h2>
+      <h2>MoveRegistry — Mint Your dance Move</h2>
       <WalletMultiButton />
       {publicKey && (
         <form onSubmit={(e) => { e.preventDefault(); mintMove(); }}>
