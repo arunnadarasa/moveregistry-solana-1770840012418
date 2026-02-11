@@ -15,7 +15,7 @@ pub mod move_registry {
     pub fn mint_move(
         ctx: Context<MintMove>,
         move_name: String,
-        video_hash: String,
+        expression: String,
         royalty_percent: u8, // 0-100
     ) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
@@ -29,7 +29,7 @@ pub mod move_registry {
         let move_data = &mut ctx.accounts.move_data;
         move_data.creator = ctx.accounts.creator.key();
         move_data.move_name = move_name;
-        move_data.video_hash = video_hash;
+        move_data.expression = expression;
         move_data.timestamp = now;
         move_data.royalty_percent = royalty_percent;
         move_data.verified = false;
@@ -155,7 +155,7 @@ pub struct LicenseMove<'info> {
 pub struct MoveData {
     pub creator: Pubkey,
     pub move_name: String,    // max 64?
-    pub video_hash: String,   // IPFS CID or Arweave hash
+    pub expression: String,   // IPFS CID or Arweave hash
     pub timestamp: i64,
     pub royalty_percent: u8,
     pub verified: bool,

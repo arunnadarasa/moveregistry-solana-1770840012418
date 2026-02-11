@@ -11,7 +11,7 @@ const METAPLEX = Metaplex.make(connection).use(keypairIdentity(/* signer */)).us
 export default function MoveMint() {
   const { publicKey, signTransaction, sendTransaction } = useWallet();
   const [moveName, setMoveName] = useState('');
-  const [videoHash, setVideoHash] = useState('');
+  const [expression, setVideoHash] = useState('');
   const [royalty, setRoyalty] = useState(5);
   const [mintedNft, setMintedNft] = useState<Nft | null>(null);
   const programId = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
@@ -52,7 +52,7 @@ export default function MoveMint() {
       {publicKey && (
         <form onSubmit={(e) => { e.preventDefault(); mintMove(); }}>
           <input placeholder="Move name" value={moveName} onChange={e => setMoveName(e.currentTarget.value)} required />
-          <input placeholder="Video hash (IPFS CID)" value={videoHash} onChange={e => setVideoHash(e.currentTarget.value)} required />
+          <input placeholder="Expression (video URL or text DSL) (IPFS CID)" value={expression} onChange={e => setVideoHash(e.currentTarget.value)} required />
           <label>Royalty %: <input type="number" min="0" max="100" value={royalty} onChange={e => setRoyalty(Number(e.currentTarget.value))} /></label>
           <button type="submit">Mint Move NFT</button>
         </form>
