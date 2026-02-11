@@ -8,9 +8,9 @@ import { Metaplex, bundlrStorage, keypairIdentity, Nft } from '@metaplex-foundat
 const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.devnet.solana.com');
 const METAPLEX = Metaplex.make(connection).use(keypairIdentity(/* signer */)).use(bundlrStorage());
 
-export default function MoveMint() {
+export default function SkillMint() {
   const { publicKey, signTransaction, sendTransaction } = useWallet();
-  const [moveName, setMoveName] = useState('');
+  const [skillName, setMoveName] = useState('');
   const [expression, setVideoHash] = useState('');
   const [royalty, setRoyalty] = useState(5);
   const [mintedNft, setMintedNft] = useState<Nft | null>(null);
@@ -47,14 +47,14 @@ export default function MoveMint() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>MoveRegistry — Mint Your dance Move</h2>
+      <h2>OpenClaw Dance Skill Registry — Mint Your dance Move</h2>
       <WalletMultiButton />
       {publicKey && (
         <form onSubmit={(e) => { e.preventDefault(); mintMove(); }}>
-          <input placeholder="Move name" value={moveName} onChange={e => setMoveName(e.currentTarget.value)} required />
+          <input placeholder="Move name" value={skillName} onChange={e => setMoveName(e.currentTarget.value)} required />
           <input placeholder="Expression (video URL or text DSL) (IPFS CID)" value={expression} onChange={e => setVideoHash(e.currentTarget.value)} required />
           <label>Royalty %: <input type="number" min="0" max="100" value={royalty} onChange={e => setRoyalty(Number(e.currentTarget.value))} /></label>
-          <button type="submit">Mint Move NFT</button>
+          <button type="submit">Mint Skill NFT</button>
         </form>
       )}
       {mintedNft && (

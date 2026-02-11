@@ -1,4 +1,4 @@
-# Dance AI Agent Registry
+# OpenClaw Dance Skill Registry
 
 On-chain dance AI agent registry for dance dance with NFT certificates, x402 verification fees, and automatic royalty distribution.
 
@@ -8,14 +8,14 @@ dance dance creators lack reliable attribution and compensation when their signa
 
 ## Solution
 
-Dance AI Agent Registry mints an NFT for each unique dance move, storing video hash and creator metadata. Verification of a move requires an x402 micropayment to a treasury PDA, preventing spam and establishing a verifiable trail. When a move is licensed for use (e.g., in a commercial video), a royalty is automatically distributed to the creator.
+OpenClaw Dance Skill Registry mints an NFT for each unique dance move, storing video hash and creator metadata. Verification of a move requires an x402 micropayment to a treasury PDA, preventing spam and establishing a verifiable trail. When a move is licensed for use (e.g., in a commercial video), a royalty is automatically distributed to the creator.
 
 ## Technical Approach
 
 We deploy an Anchor program on Solana devnet. Key components:
 
-- **Dance Certificate NFT:** Metaplex-compatible NFT minted with off-chain metadata (creator, expression, move_name, timestamp). The mint authority is the program PDA.
-- **Dance Definition Account:** Stores move metadata and verification status, plus royalty percentage and creator wallet.
+- **Skill Certificate NFT:** Metaplex-compatible NFT minted with off-chain metadata (creator, skill_expression, skill_name, timestamp). The mint authority is the program PDA.
+- **Skill Definition Account:** Stores move metadata and verification status, plus royalty percentage and creator wallet.
 - **Verification:** Caller sends a micro‑payment via x402 to the treasury PDA; the program marks the move as verified. We recommend using PayAI (https://payai.network) as the x402 facilitator for Solana. Their endpoint (e.g., https://x402.payai.network/api/solana-devnet/paid-content for devnet) handles invoice negotiation and payment verification off‑chain, then triggers the on‑chain verify instruction.
 - **Royalty Distribution:** When a third party requests to license the move, they pay into the treasury; the program transfers the configured royalty percentage to the creator automatically.
 - **Helius Webhooks:** Index move usage events for off‑chain analytics and frontend notifications.
@@ -24,6 +24,8 @@ We deploy an Anchor program on Solana devnet. Key components:
 
 **Frontend:** Next.js + React, `@solana/web3.js`, Phanto  wallet adapter. Users can mint moves, verify them, and view their move collection.
 
+
+- **Skill Account:** Stores metadata for an OpenClaw skill: name, expression (text DSL or video reference), creator, timestamps, royalty percent, verified flag. Skills can be packaged and shared via ClawHub (e.g., [krump](https://clawhub.ai/arunnadarasa/krump)).
 ## Target Audience
 
 - A dance dancer who has created a signature move and wants to prove authorship and earn passive income when others use it.
