@@ -103,6 +103,18 @@ We are the only system that combines on‑chain verification, AI‑agent readine
 
 This project draws inspiration from early text‑based dance RPGs and systems like [dance-verify](https://github.com/arunnadarasa/dance-verify) and the [krump OpenClaw skill](https://clawhub.ai/arunnadarasa/krump) that explore attribution and agentic commerce for dance.
 
+
+## Demo Deployment
+
+The frontend can be deployed to Vercel for judges and community members to try:
+
+1. Click the Deploy button (requires Vercel account):
+   [Deploy to Vercel](https://vercel.com/new/clone?repository-url=https://github.com/arunnadarasa/moveregistry-solana-1770840012418)
+2. In the Vercel project settings, add an environment variable:
+   - NEXT_PUBLIC_PROGRAM_ID=YOUR_PROGRAM_ID (once the Anchor program is deployed)
+3. After deployment, open the site and connect a Solana wallet (Phantom) to interact.
+
+Note: The demo uses Solana devnet by default. Switch RPC in wallet settings if needed.
 ## Getting Started
 
 ```bash
