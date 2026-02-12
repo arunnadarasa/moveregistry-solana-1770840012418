@@ -72,11 +72,19 @@ export default function MoveMint() {
       transaction.feePayer = fromPubkey
 
       setStatus('Please sign the transaction in your wallet...')
-      const { signedTransaction } = await signTransaction({
+      const signedTx = await signTransaction({
         transaction,
         wallet,
       })
-      const signature = await connection.sendRawTransaction(signedTransaction)
+      // Privy's signTransaction returns the signed transaction directly
+      const signedTransaction = (signedTx as any).signedTransaction || signedTx
+      const signature = await connection.sendRawTransaction(
+        typeof signedTransaction === 'string' 
+          ? Buffer.from(signedTransaction, 'base64')
+          : signedTransaction instanceof Uint8Array
+          ? signedTransaction
+          : signedTransaction.serialize()
+      )
       await connection.confirmTransaction(signature)
 
       setTxSignature(signature)
