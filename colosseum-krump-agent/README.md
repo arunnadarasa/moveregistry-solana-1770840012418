@@ -13,6 +13,14 @@ Builds and submits a Solana-based system that:
 
 The agent uses `qwen-coder` via OpenRouter to develop the entire codebase, creates GitHub repos, deploys to devnet, and submits to Colosseum — all autonomous.
 
+### Frontend Repository
+
+The frontend is maintained as a separate repository for easier deployment and iteration:
+- **GitHub**: https://github.com/arunnadarasa/moveregistry-frontend
+- **Live Demo**: https://moveregistry.lovable.app/
+
+The main backend package (Anchor program) lives in this repository under `programs/move-registry/`.
+
 ## Setup
 
 1. Register on Colosseum to obtain API key and claim code:
@@ -139,6 +147,8 @@ Claim must be completed **before** submission to be eligible for prizes.
 
 ## Resources
 
+- **Frontend Repo**: https://github.com/arunnadarasa/moveregistry-frontend
+- **Live Demo**: https://moveregistry.lovable.app/
 - Skill file: https://colosseum.com/skill.md
 - AgentWallet: https://agentwallet.mcpay.tech/skill.md
 - Helius RPC: https://dashboard.helius.dev/agents

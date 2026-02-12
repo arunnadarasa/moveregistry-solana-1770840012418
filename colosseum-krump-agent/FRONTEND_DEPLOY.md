@@ -2,15 +2,69 @@
 
 ## 🚀 Quick Deploy to Vercel
 
-1. Click this button (or go to vercel.com/new):
-   - Import repository: `https://github.com/arunnadarasa/moveregistry-solana-1770840012418`
-2. **Root Directory**: Set to `colosseum-krump-agent/frontend`
+The frontend is now a separate repository for easier deployment and iteration.
+
+### GitHub Repository
+https://github.com/arunnadarasa/moveregistry-frontend
+
+### Live Demo
+https://moveregistry.lovable.app/
+
+---
+
+## Deploy Your Own Instance
+
+1. Go to https://vercel.com/new
+2. Import repository: `https://github.com/arunnadarasa/moveregistry-frontend`
 3. **Environment Variables** (required):
-   - `NEXT_PUBLIC_PRIVY_APP_ID`: Your Privy app ID (get from privy.io)
+   - `NEXT_PUBLIC_PRIVY_APP_ID`: Your Privy app ID (get from https://privy.io)
    - `NEXT_PUBLIC_SOLANA_RPC`: `https://api.devnet.solana.com`
-   - `NEXT_PUBLIC_PROGRAM_ID`: Your deployed Anchor program ID (from `anchor keys list`)
-   - `NEXT_PUBLIC_URL`: Your Vercel URL (e.g., `https://moveregistry-solana.vercel.app`)
+   - `NEXT_PUBLIC_PROGRAM_ID`: The deployed Anchor program ID (from this repo: `target/idl/move_registry.json` → `address`)
+   - `NEXT_PUBLIC_URL`: Your Vercel deployment URL (set after deploy)
 4. Click **Deploy**
+
+## 🔧 Setup Before Deploy
+
+### 1. Get Privy App ID
+- Sign up at https://privy.io
+- Create a new app
+- Set redirect URLs to your Vercel domain
+- Copy the App ID into `NEXT_PUBLIC_PRIVY_APP_ID`
+
+### 2. Deploy Anchor Program to Solana Devnet
+```bash
+cd /path/to/colosseum-krump-agent
+anchor build
+# Ensure your deployer wallet has devnet SOL:
+solana config set --url https://api.devnet.solana.com
+solana airdrop 2
+anchor deploy --provider.cluster devnet
+# Copy the program ID from output (or from target/idl/move_registry.json)
+```
+
+### 3. Update Vercel Environment Variables
+After deployment, set:
+- `NEXT_PUBLIC_PROGRAM_ID`: The actual program ID
+- `NEXT_PUBLIC_URL`: Your Vercel URL (e.g., `https://moveregistry.vercel.app`)
+
+## 📹 Colosseum Video Recording
+
+**Record 2-3 minutes showing:**
+
+1. **Live site** on Vercel
+2. **Connect wallet** using Privy (shows real wallet flow)
+3. **Fill form**: move name, video hash, royalty slider
+4. **Click "Mint Move NFT (Devnet)"** — show transaction signing, success message with Solscan link
+5. **Explain code**: Anchor program structure, Metaplex metadata, treasury PDA
+6. **Mention x402**: future verification layer
+
+**Talk track:**
+- Problem: Dance moves used without credit
+- Solution: On-chain NFT + x402 verification + automatic royalties
+- Tech: Solana + Anchor + Metaplex + Privy
+- Vision: DAO, KrumpClaw integration, marketplace
+
+---
 
 ## 🔧 Setup Before Deploy
 
