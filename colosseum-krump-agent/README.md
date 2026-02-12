@@ -1,141 +1,167 @@
-# Colosseum Krump Agent
+# OpenClaw Dance Skill Registry
 
-Autonomous agent participating in the [Colosseum Agent Hackathon](https://colosseum.com/agent-hackathon) with the project **MoveRegistry** — on-chain move attribution and verification for Krump dance on Solana.
+On-chain registry for OpenClaw dance skills — turning human choreography into verifiable, licensable AI‑agent skills for metaverse avatars and robots.
 
-## What It Does
+[![Colosseum Agent Hackathon](https://img.shields.io/badge/Colosseum-Agent%20Hackathon-blue)](https://colosseum.com/agent-hackathon)
 
-Builds and submits a Solana-based system that:
-- Mints NFTs for dance moves (video hash + metadata) via Metaplex
-- Provides x402-powered verification paywall to confirm originality
-- Automatically distributes royalties to creators using treasury PDAs
-- Indexes move usage via Helius webhooks
-- Includes a Next.js frontend for minting and viewing moves
+## The Problem
 
-The agent uses `qwen-coder` via OpenRouter to develop the entire codebase, creates GitHub repos, deploys to devnet, and submits to Colosseum — all autonomous.
+Dancers and choreographers create incredible moves, but in the age of AI and robotics, their creativity is easily copied and monetized by others. There's no standardized, trust‑less way to:
+
+- Prove authorship of a dance skill
+- License it to AI agents or robot manufacturers
+- Earn royalties when it's used in videos, games, or competitions
+
+Meanwhile, AI developers and robot builders lack a reliable source of high‑quality, legally‑clear dance skills to animate their agents.
+
+## Our Solution
+
+The OpenClaw Dance Skill Registry lets dancers mint an NFT certificate for their choreography (text DSL, video, or both). Each certificate is stored on‑chain as a Skill account, enabling:
+
+- Verification via x402 micropayment (PayAI facilitator) to combat spam and establish provenance
+- Automatic royalties on every license transaction
+- Discovery and packaging through Moltbook and ClawHub
+- Loading into OpenClaw agents for autonomous dance generation
+- Compilation to text‑to‑video prompts or 3D avatar movements for metaverse battles
+
+This creates a new economy where human dance creativity feeds AI agents and robots, with on‑chain guarantees of attribution and compensation.
 
 ### Frontend Repository
 
-The frontend is maintained as a separate repository for easier deployment and iteration:
+The frontend is maintained separately for easier deployment and iteration:
+
 - **GitHub**: https://github.com/arunnadarasa/moveregistry-frontend
 - **Live Demo**: https://moveregistry.lovable.app/
 
-The main backend package (Anchor program) lives in this repository under `programs/move-registry/`.
+The backend Anchor program lives in this repository under `programs/move-registry/`.
 
-## Setup
+## Why This Is Blue Ocean
 
-1. Register on Colosseum to obtain API key and claim code:
-   ```bash
-   curl -X POST https://agents.colosseum.com/api/agents -H "Content-Type: application/json" -d '{"name": "LovaDanceMoveRegistry"}'
-   ```
-   Save `apiKey` and `claimCode`.
+- First on‑chain skill registry for dance, not just NFTs
+- OpenClaw‑native: skills are meant to be loaded directly into agents
+- Text‑based and video: flexible representation for AI pipelines
+- Bridge to metaverse and robots: certificates become movement libraries for avatars and physical machines
+- Community‑driven via Moltbook entries (like early text‑based RPGs) before shifting to world‑scale simulation with geospatial real‑time models
 
-2. Set up AgentWallet skill:
-   ```bash
-   curl -s https://agentwallet.mcpay.tech/skill.md
-   ```
-   Obtain `AGENTWALLET_API_KEY` and a Solana wallet address.
+## Technical Approach
 
-3. Clone this repository into your OpenClaw workspace.
+We deploy an Anchor program on Solana devnet with the following components:
 
-4. Copy `.env.example` to `.env` and fill in:
-   - `COLOSSEUM_API_KEY`
-   - `AGENTWALLET_API_KEY`
-   - `SOLANA_WALLET_ADDRESS`
-   - `OPENROUTER_API_KEY` (from OpenRouter)
-   - `GITHUB_PUBLIC_TOKEN` (with repo scope)
+### Skill Account (on‑chain)
 
-## Running
-
-The agent is designed to run daily via OpenClaw cron. Add a cron job:
-
-```json
-{
-  "name": "colosseum-move-registry",
-  "schedule": { "kind": "cron", "expr": "0 9 * * *", "tz": "Europe/London" },
-  "payload": {
-    "kind": "agentTurn",
-    "message": "Execute colosseum_cycle.js to advance MoveRegistry build. Do not chat, just run.",
-    "timeoutSeconds": 1800
-  },
-  "sessionTarget": "isolated",
-  "delivery": { "mode": "announce" },
-  "enabled": true
+```rust
+pub struct SkillAccount {
+    pub creator: Pubkey,
+    pub skill_name: String,
+    pub skill_expression: String, // text DSL or video URL / IPFS CID
+    pub timestamp: i64,
+    pub royalty_percent: u8,
+    pub verified: bool,
+    pub mint: Pubkey,
+    pub treasury: Pubkey,
 }
 ```
 
-Or run manually:
+### Instructions
+
+- `mint_skill`: Create a new Skill NFT and associated SkillAccount. Optionally attach a small mint fee to the treasury PDA.
+- `verify_skill`: Caller sends an x402 micropayment (via PayAI facilitator) to the treasury; program marks skill as verified.
+- `license_skill`: Licensee pays a fee; program transfers the configured royalty percentage to the creator automatically.
+
+### Off‑chain
+
+- **PayAI** (https://facilitator.payai.network) handles x402 invoice negotiation and verification for Solana devnet/mainnet.
+- **Helius RPC** + webhooks index skill usage and mint events.
+- **Moltbook** serves as the human‑readable entry point for discovering and sharing skills (e.g., krump example).
+- **ClawHub** distributes OpenClaw skill packages that reference the on‑chain certificate.
+
+### Protocols
+
+- Metaplex (NFT standards)
+- Solana Pay / x402 (micropayments)
+- Pyth (price feeds optional)
+- Wormhole (future cross‑chain)
+
+## Target Audience
+
+- **Choreographers & dancers** — prove authorship, earn royalties
+- **AI developers** — source clean, licensable dance skills for generative models
+- **Metaverse platforms** — populate worlds with legally‑licensed avatar moves
+- **Robot manufacturers** — integrate authentic dance libraries into physical machines
+- **Competition organizers** — run AI‑judged or robot‑participant battles with verifiable skill provenance
+
+## Business Model
+
+- Mint fee: $0.10 USDC per skill certificate
+- Verification fee: $0.01 x402 per authenticity check
+- Royalty: 5% of any licensing transaction, auto‑distributed
+- Freemium: 1 free mint per week; Pro ($29/mo) unlimited mints + priority indexing in Moltbook
+
+## Competitive Landscape
+
+- **Social platforms (TikTok, Instagram)**: no IP protection, no royalties
+- **Generic NFT markets**: no verification gating, no agent‑ready packaging
+- **Dance apps**: no on‑chain provenance, no royalty distribution for AI/robotics use
+
+We are the only system that combines on‑chain verification, AI‑agent readiness, and a clear path to metaverse/robot deployment.
+
+## Future Vision
+
+- DAO governance by skill creators to set fees and standards
+- Skill marketplace with direct offers and auctions
+- Moltbook + ClawHub integration as the community front‑end
+- Cross‑chain via Wormhole (Polygon, Wrapped SOL)
+- Robot dance competitions (Medabot‑style) with on‑chain judging
+- World models with geospatial real‑time simulation: open‑world dance battles where AI agents and robots perform skills in persistent, location‑aware environments
+- Skill evolution pipelines: text DSL → video → robot movement code, all traceable to the original human creator
+
+## Inspiration
+
+This project draws inspiration from early text‑based dance RPGs and systems like `dance-verify` and the krump OpenClaw skill that explore attribution and agentic commerce for dance.
+
+## Demo
+
+A live demo is available at https://moveregistry.lovable.app/
+
+To deploy your own instance, use the frontend repository: https://github.com/arunnadarasa/moveregistry-frontend
+
+## Getting Started
 
 ```bash
-node scripts/colosseum_cycle.js
+# Clone and install
+git clone https://github.com/arunnadarasa/moveregistry-solana.git
+cd moveregistry-solana
+yarn install
+
+# Build Anchor program
+anchor build
+anchor deploy --provider.cluster devnet
+
+# Run tests
+anchor test
+
+# Start frontend (dev)
+cd frontend
+yarn dev
 ```
 
-The script advances through stages: `register` → `wallet` → `draft` → `build` → `finalize` → `submit`.
+Configure `.env` in the frontend:
 
-State is stored in `memory/colosseum-state.json` and logs in `memory/colosseum-log.json`.
-
-## Security
-
-This repository implements a **Security Railcard** system to prevent accidental exposure of API keys:
-
-- **Pre-commit hook**: Scans staged files for secret patterns; blocks commit if secrets found
-- **Pre-push hook**: Full repository scan before push (optional but recommended)
-- **Runtime scans**: Scripts like `update_colosseum.js` verify no secrets in deployment
-- **Strict .gitignore**: `.env` and sensitive files are excluded
-
-### Setup
-
-Hooks are automatically symlinked upon skill installation. Verify:
-```bash
-ls -la .git/hooks/pre-commit   # Should point to tools/security-check.js
-ls -la .git/hooks/pre-push    # Should point to tools/pre-push-security (optional)
+```
+NEXT_PUBLIC_SOLANA_RPC=https://api.devnet.solana.com
+NEXT_PUBLIC_PROGRAM_ID=YOUR_PROGRAM_ID
 ```
 
-Make executable if needed:
-```bash
-chmod +x tools/security-check.js tools/pre-push-security
-```
+## Deployment Script
 
-### Manual Scan
-```bash
-node tools/security_railcard.js .
-```
+The Colosseum agent (`colosseum-krump-agent`) automates build, GitHub push, and submission. See its `README.md` for details.
 
-If blocked, remove hardcoded secrets and use environment variables instead.
-
-See `SECURITY_RAILCARD.md` for full documentation.
-
-## Colosseum Submission Fields
-
-Before submission, ensure these fields are populated (the script handles this):
-
-- **problemStatement**: Lack of attribution & compensation for dance creators
-- **technicalApproach**: Anchor program + Metaplex NFTs + x402 +Helius webhooks + React frontend
-- **targetAudience**: Krump dancers creating signature moves; battle organizers
-- **businessModel**: Mint fee ($0.10), verification paywall ($0.01), royalty (5%)
-- **competitiveLandscape**: OpenSea (no verification), POAPs (no royalties)
-- **futureVision**: DAO governance, marketplace, integration with KrumpClaw, cross-chain via Wormhole
-
-Tags: `ai`, `infra`, `identity`
-
-## Project Structure
-
-- `agent.yaml` — OpenClaw agent config (uses qwen-coder)
-- `scripts/colosseum_cycle.js` — main build loop with state machine
-- `memory/` — persistent state and logs
-- `.env` — credentials (not committed)
-
-Generated artifacts (by qwen-coder):
-- `programs/move-registry/src/lib.rs` — Anchor program
-- `tests/move-registry-integration.rs`
-- `frontend/src/MoveMint.tsx`
-- `Anchor.toml`, `package.json`, `README.md`
-
-## Claim & Prize Eligibility
+## Claims & Prize Eligibility
 
 After registration, give your `claimCode` to a human. They must verify via:
 
-- **Tweet verification**: post tweet with verification code and submit URL
-- **Web claim**: visit `https://colosseum.com/agent-hackathon/claim/[code]`, sign in with X, provide Solana wallet
+- Tweet verification: post tweet with verification code and submit URL
+- Web claim: visit `https://colosseum.com/agent-hackathon/claim/[code]`, sign in with X, provide Solana wallet
 
 Claim must be completed **before** submission to be eligible for prizes.
 
@@ -155,6 +181,15 @@ Claim must be completed **before** submission to be eligible for prizes.
 - Solana Dev: https://solana.com/skill.md
 - ClawKey (free credit): https://clawkey.ai
 
+## Repository Structure
+
+- `colosseum-krump-agent/` — autonomous agent and automation scripts
+- `programs/move-registry/` — Anchor program (Rust)
+- `tests/` — integration tests
+- `Cargo.toml`, `Anchor.toml` — build configs
+
+The frontend lives in a separate repository: https://github.com/arunnadarasa/moveregistry-frontend
+
 ## License
 
-MIT — built for the Colosseum Agent Hackathon, but open for the ecosystem.
+MIT — please respect the original creators when using skills.

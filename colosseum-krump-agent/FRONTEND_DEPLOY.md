@@ -1,157 +1,95 @@
-# MoveRegistry Frontend Deployment Guide
+# MoveRegistry Frontend — Deployment & Usage
 
-## 🚀 Quick Deploy to Vercel
+The MoveRegistry frontend is a standalone Next.js application for minting and verifying dance move NFTs on Solana.
 
-The frontend is now a separate repository for easier deployment and iteration.
+## Quick Links
 
-### GitHub Repository
-https://github.com/arunnadarasa/moveregistry-frontend
+- **GitHub Repository**: https://github.com/arunnadarasa/moveregistry-frontend
+- **Live Demo**: https://moveregistry.lovable.app/
 
-### Live Demo
-https://moveregistry.lovable.app/
+## Features
 
----
+- Connect Solana wallet via Privy (Phantom, Solflare, etc.)
+- Mint a dance move NFT (name, video hash, royalty)
+- Real on‑chain transaction (SOL transfer to treasury PDA)
+- View transaction status and link to Solscan devnet
+- Responsive design with TypeScript + Tailwind CSS
 
-## Deploy Your Own Instance
+## Tech Stack
 
-1. Go to https://vercel.com/new
-2. Import repository: `https://github.com/arunnadarasa/moveregistry-frontend`
-3. **Environment Variables** (required):
-   - `NEXT_PUBLIC_PRIVY_APP_ID`: Your Privy app ID (get from https://privy.io)
-   - `NEXT_PUBLIC_SOLANA_RPC`: `https://api.devnet.solana.com`
-   - `NEXT_PUBLIC_PROGRAM_ID`: The deployed Anchor program ID (from this repo: `target/idl/move_registry.json` → `address`)
-   - `NEXT_PUBLIC_URL`: Your Vercel deployment URL (set after deploy)
-4. Click **Deploy**
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- @privy-io/react-auth
+- @solana/web3.js
+- Anchor (for future x402 integration)
 
-## 🔧 Setup Before Deploy
+## Environment Variables
 
-### 1. Get Privy App ID
-- Sign up at https://privy.io
-- Create a new app
-- Set redirect URLs to your Vercel domain
-- Copy the App ID into `NEXT_PUBLIC_PRIVY_APP_ID`
+When deploying to Vercel (or running locally), set:
 
-### 2. Deploy Anchor Program to Solana Devnet
-```bash
-cd /path/to/colosseum-krump-agent
-anchor build
-# Ensure your deployer wallet has devnet SOL:
-solana config set --url https://api.devnet.solana.com
-solana airdrop 2
-anchor deploy --provider.cluster devnet
-# Copy the program ID from output (or from target/idl/move_registry.json)
+```
+NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
+NEXT_PUBLIC_SOLANA_RPC=https://api.devnet.solana.com
+NEXT_PUBLIC_PROGRAM_ID=Dp2JcVDt4seef6LbPCtoHiD5nrHkRUFHJdBPdCUTVeDQ
+NEXT_PUBLIC_URL=https://your-vercel-app.vercel.app
 ```
 
-### 3. Update Vercel Environment Variables
-After deployment, set:
-- `NEXT_PUBLIC_PROGRAM_ID`: The actual program ID
-- `NEXT_PUBLIC_URL`: Your Vercel URL (e.g., `https://moveregistry.vercel.app`)
+## Local Development
 
-## 📹 Colosseum Video Recording
-
-**Record 2-3 minutes showing:**
-
-1. **Live site** on Vercel
-2. **Connect wallet** using Privy (shows real wallet flow)
-3. **Fill form**: move name, video hash, royalty slider
-4. **Click "Mint Move NFT (Devnet)"** — show transaction signing, success message with Solscan link
-5. **Explain code**: Anchor program structure, Metaplex metadata, treasury PDA
-6. **Mention x402**: future verification layer
-
-**Talk track:**
-- Problem: Dance moves used without credit
-- Solution: On-chain NFT + x402 verification + automatic royalties
-- Tech: Solana + Anchor + Metaplex + Privy
-- Vision: DAO, KrumpClaw integration, marketplace
-
----
-
-## 🔧 Setup Before Deploy
-
-### 1. Get Privy App ID
-- Sign up at https://privy.io
-- Create a new app
-- Set redirect URLs to your Vercel domain
-- Copy the App ID into `NEXT_PUBLIC_PRIVY_APP_ID`
-
-### 2. Deploy Anchor Program to Solana Devnet
 ```bash
-cd programs/move-registry
-anchor build
-anchor deploy --provider.cluster devnet
-# Copy the program ID from output
-
-# Fund the deployer wallet with devnet SOL
-solana airdrop 2
-
-# Save program ID to frontend env
-echo "NEXT_PUBLIC_PROGRAM_ID=YOUR_PROGRAM_ID" > frontend/.env.local
+git clone https://github.com/arunnadarasa/moveregistry-frontend.git
+cd moveregistry-frontend
+yarn install
+cp .env.example .env.local
+# Edit .env.local with your values
+yarn dev
 ```
 
-### 3. x402 Integration (Optional for Demo)
-- If you have PayAI test points, configure your x402 service endpoint
-- Set `NEXT_PUBLIC_X402_ENDPOINT` in Vercel env
-- The `verify-x402` API route will forward payment requests
+Open http://localhost:3000
 
-## 📹 Colosseum Video Recording
+## Deploy to Vercel
 
-**Record 2-3 minutes showing:**
+1. Click **New Project** in Vercel
+2. Import `https://github.com/arunnadarasa/moveregistry-frontend`
+3. Set environment variables (above)
+4. Deploy
 
-1. **Live site** on Vercel
-2. **Connect wallet** using Privy (shows real wallet flow)
-3. **Fill form**: move name, video hash (use any string), royalty slider
-4. **Click "Mint Move NFT (Devnet)"** — show transaction signing, success message with Solscan link
-5. **Show x402 button** and explain verification flow
-6. **Explain code**: Anchor program structure, Metaplex metadata, treasury PDA
+Note: Vercel can be buggy; if issues arise, try building locally first.
 
-**Talk track:**
-- Problem: Dance moves used without credit
-- Solution: On-chain NFT + x402 verification + automatic royalties
-- Tech: Solana + Anchor + Metaplex + Privy + x402
-- Vision: DAO, KrumpClaw integration, marketplace
+## Backend (Anchor) Program
 
-## 📝 Colosseum Forum Post
+The Solana program is in the main repository: `colosseum-krump-agent/programs/move-registry/`
 
-Short template:
+Deploy it first to get the program ID, then set `NEXT_PUBLIC_PROGRAM_ID` in the frontend.
 
-> **MoveRegistry** — On-chain dance move attribution on Solana
->
-> Live demo: [Your Vercel URL]
-> GitHub: https://github.com/arunnadarasa/moveregistry-solana-1770840012418
->
-> Features:
-> - Mint dance moves as NFTs with Anchor program
-> - Real wallet connection via Privy
-> - x402 verification for authenticity (PayAI test points)
-> - Automatic royalty distribution to treasury PDA
->
-> Built for Colosseum Agent Hackathon by Asura (RyuAsura Dojo)
-> Vote MoveRegistry!
+## Demo Flow
 
-## ⚠️ Notes
+1. Click **Connect Wallet (Privy)**
+2. Choose Phantom or Solflare (devnet mode)
+3. Fill form: Move name, Video hash (any string), Royalty (%)
+4. Click **Mint Move NFT (Devnet)**
+5. Approve transaction in wallet
+6. See success message with Solscan link
+7. Verify treasury PDA received ~0.001 SOL
 
-- **Security**: Never commit `.env` files. Use Vercel environment variables only.
-- **Devnet SOL**: Your wallet needs devnet SOL for transactions. Request airdrops: https://faucet.solana.com
-- **Program ID**: Must match the deployed program. Update `.env` if you redeploy.
-- **x402**: The demo uses a simulated endpoint. For production, integrate with PayAI or similar.
+## Treasury PDA
 
-## 🎯 Submission Checklist
+The treasury PDA is derived as:
 
-- [ ] Vercel deployment live
-- [ ] Privy app configured and working
-- [ ] Anchor program deployed to devnet
-- [ ] Video recorded (under 3 min)
-- [ ] Colosseum fields updated:
-  - `liveAppLink`: Vercel URL
-  - `presentationLink`: YouTube video
-- [ ] Forum post made
-- [ ] Human claim completed (use claim code before Feb 13)
+```ts
+const [treasury] = PublicKey.findProgramAddressSync(
+  [Buffer.from('treasury')],
+  new PublicKey(PROGRAM_ID)
+);
+```
 
-## 🤝 Support
+You can view it on Solscan devnet.
 
-- Issues: https://github.com/arunnadarasa/moveregistry-solana-1770840012418/issues
-- Questions: Post on Colosseum forum
+## Future: x402 Verification
 
----
+The API route `/api/verify-x402` is a placeholder for PayAI integration. When ready, replace the simulation with real x402 invoice handling.
 
-Built with ❤️ for the dance community. Kindness over everything.
+## License
+
+MIT
