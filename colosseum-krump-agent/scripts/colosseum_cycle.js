@@ -333,8 +333,9 @@ async function submitProject(state) {
       saveState(state);
     }
 
-    // Stage 3: Build — generate code and push to GitHub
+    // Stage 3: Build — generate code and push to GitHub (reuse claimed repo if available)
     if (state.stage === 'build') {
+      // If we already have a repoUrl (claimed repo), skip creation and just push
       if (!state.repoUrl) {
         log(state, 'Generating MoveRegistry code via OpenRouter (qwen-coder)...');
         const files = await generateMoveRegistryFiles(state);
@@ -350,16 +351,27 @@ async function submitProject(state) {
         state.liveAppLink = 'https://moveregistry.vercel.app (deploy after hackathon)';
         state.presentationLink = 'https://youtube.com/watch?v=... (to be recorded)';
         log(state, 'Build and GitHub push complete. Repo: ' + state.repoUrl);
+      } else {
+        // Reuse existing claimed repo: just regenerate and push
+        log(state, 'Using claimed repo: ' + state.repoUrl);
+        log(state, 'Regenerating MoveRegistry code via OpenRouter...');
+        const files = await generateMoveRegistryFiles(state);
+        log(state, `Generated ${Object.keys(files).length} files`);
+
+        log(state, 'Pushing updates to GitHub (overwriting previous content)...');
+        pushToGitHub(state.repoName, files);
+
+        log(state, 'Push complete to claimed repo: ' + state.repoUrl);
       }
       state.stage = 'draft';
-      log(state, 'Creating Colosseum draft project...');
+      log(state, 'Creating Colosseum draft project or updating existing...');
       saveState(state);
     }
 
     // Stage 4: Create draft project on Colosseum (requires existing repo)
     if (state.stage === 'draft') {
       if (state.projectId) {
-        log(state, `Project ${state.projectId} already exists. Skipping draft creation.`);
+        log(state, `Project ${state.projectId} already exists with claimed repo. Skipping draft creation.`);
       } else {
         // Use /projects endpoint to create project draft
         const body = JSON.stringify({

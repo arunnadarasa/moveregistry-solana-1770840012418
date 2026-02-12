@@ -30,27 +30,46 @@ if (!MOLTBOOK_API_KEY || !GITHUB_TOKEN || !OPENROUTER_API_KEY) {
   process.exit(1);
 }
 
-// OpenRouter call using global fetch (Node 18+)
+// OpenRouter call using global fetch (Node 18+) with retry for rate limits
 async function callOpenRouter(prompt, temperature = 0.3) {
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'openrouter/qwen/qwen3-coder:free',
-      messages: [{ role: 'user', content: prompt }],
-      temperature,
-      max_tokens: 4096
-    })
-  });
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`OpenRouter error ${response.status}: ${err}`);
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'qwen/qwen3-coder:free',
+          messages: [{ role: 'user', content: prompt }],
+          temperature,
+          max_tokens: 4096
+        })
+      });
+      if (!response.ok) {
+        const err = await response.text();
+        if (response.status === 429 && attempt < maxRetries) {
+          const waitMs = 10000 * attempt; // 10s, 20s, 30s
+          console.log(`Rate limited (429). Retrying in ${waitMs}ms... (attempt ${attempt}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, waitMs));
+          continue;
+        }
+        throw new Error(`OpenRouter error ${response.status}: ${err}`);
+      }
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (err) {
+      if (err.message.includes('429') && attempt < maxRetries) {
+        const waitMs = 10000 * attempt;
+        console.log(`Rate limited (429) in catch. Retrying in ${waitMs}ms... (attempt ${attempt}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, waitMs));
+        continue;
+      }
+      throw err;
+    }
   }
-  const data = await response.json();
-  return data.choices[0].message.content;
 }
 
 // Post to Moltbook
@@ -123,13 +142,38 @@ function pushToGitHub(repoName, files) {
 }
 
 function log(message) {
-  const log = fs.existsSync(LOG_PATH) ? JSON.parse(fs.readFileSync(LOG_PATH, 'utf8')) : [];
+  let log = [];
+  if (fs.existsSync(LOG_PATH)) {
+    try {
+      const content = fs.readFileSync(LOG_PATH, 'utf8').trim();
+      if (content) log = JSON.parse(content);
+    } catch (e) {
+      log = []; // reset if corrupt
+    }
+  }
   log.push({
     timestamp: new Date().toISOString(),
     message
   });
+  fs.mkdirSync(path.dirname(LOG_PATH), { recursive: true });
   fs.writeFileSync(LOG_PATH, JSON.stringify(log, null, 2));
   console.log(message);
+}
+
+// State management
+function loadState() {
+  if (!fs.existsSync(STATE_PATH)) return { lastRunDate: null, trackState: {}, feedback: [] };
+  try {
+    const content = fs.readFileSync(STATE_PATH, 'utf8').trim();
+    return content ? JSON.parse(content) : { lastRunDate: null, trackState: {}, feedback: [] };
+  } catch (e) {
+    return { lastRunDate: null, trackState: {}, feedback: [] };
+  }
+}
+
+function saveState(state) {
+  fs.mkdirSync(path.dirname(STATE_PATH), { recursive: true });
+  fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2));
 }
 
 // Track definitions – creative idea lists
