@@ -154,6 +154,49 @@ Both systems run as **isolated sessions** via OpenClaw native cron, ensuring fre
 
 ## Credentials
 
+## Codebase Transparency Log
+
+This section tracks significant updates, security patches, and feature deployments across all agent workspaces. Use this to audit changes and understand the evolution of the system.
+
+### 2026-02-12 — Security Incident Response & Enhancements
+
+**Incident:** OpenRouter API key (`sk-or-v1-...c970`) exposed in `krump-agent/models.json` (commit cb7996d). OpenRouter auto-disabled the key.
+
+**Actions Taken:**
+
+1. **Immediate remediation (krump-agent)**
+   - `dbef0ee` — security: add Security Railcard system
+     - Added `tools/security_railcard.js` (secret scanner)
+     - Added `tools/security-check.js` (pre-commit hook)
+     - Cleared `models.json` apiKey (set to empty)
+     - Updated `.env` with new `OPENROUTER_API_KEY`
+     - Strengthened `.gitignore`
+   - `e318110` — feat: enhance KrumpClaw Lab posts
+     - Upgraded `scripts/krumpclab_post.js` to premium format
+     - Added lineage references, day progression, character focus
+     - Created LAB_CATALOG with 8 curated topics
+
+2. **Skill package updates (dance-agentic-engineer-skill)**
+   - `9300d4f` — feat: add Security Railcard system (v0.1.2)
+   - `67c259d` — docs: clarify pre-commit hook installation
+   - `1cfc193` — refactor: rename pre-commit-security to security-check.js (ClawHub compatibility)
+   - `26dcd53` — docs: fix paths for renamed security-check.js
+   - `0f18e31` — refactor: enhance KrumpClab posts to high-quality format
+
+3. **Colosseum agent updates**
+   - `14dead2` — fix: use claimed repo until deadline; don't create new repos
+     - Modified `scripts/colosseum_cycle.js` to reuse claimed repo
+     - State updated to point to `moveregistry-solana-1770840012418`
+     - Project stage: `finalize` → `done`
+
+**Current Status (as of 09:56 GMT):**
+- All agents using new `OPENROUTER_API_KEY=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`
+- Security railcards active in all workspaces
+- KrumpClab Lab posts now match premium quality template
+- Colosseum MoveRegistry project 649 submitted and code pushed to claimed repo
+
+---
+
 ## Notes
 
 - The legacy `krump-dancetech-daily` script continues to post 3/day (skill, commerce, contract) with 30-min gaps, building basic repo templates.

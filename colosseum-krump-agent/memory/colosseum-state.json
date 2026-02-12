@@ -1,5 +1,5 @@
 {
-  "stage": "finalize",
+  "stage": "done",
   "agentId": 3791,
   "apiKey": "2ee19d4e93ba170739f687933d50f3281b8a8fa715e542762fa470c62c45097d",
   "claimCode": "eca01d3a-accf-4e9e-9c1a-da8ab0daeeb0",
@@ -11,19 +11,9 @@
   "presentationLink": "https://youtube.com/watch?v=... (to be recorded)",
   "lastRunDate": "2026-02-12",
   "logs": [
-    "[2026-02-11T21:33:05.155Z] Wallet address: 8YoyHPqn51Nbs1UNmsAKsVP6gj3WnQrg78c8pzMGdzhE. Ready to build.",
-    "[2026-02-11T21:33:05.157Z] Generating MoveRegistry code via OpenRouter (qwen-coder)...",
-    "[2026-02-11T21:34:51.054Z] Generated 7 files",
-    "[2026-02-11T21:34:51.055Z] Creating GitHub repository...",
-    "[2026-02-11T21:34:52.260Z] Pushing code to GitHub...",
-    "[2026-02-11T21:34:53.482Z] Build and GitHub push complete. Repo: https://github.com/arunnadarasa/moveregistry-solana-1770845585155",
-    "[2026-02-11T21:34:53.483Z] Creating Colosseum draft project...",
-    "[2026-02-11T21:34:53.483Z] Project 649 already exists. Skipping draft creation.",
-    "[2026-02-11T21:34:53.483Z] Updating Colosseum project with required fields and links...",
-    "[2026-02-11T21:34:54.495Z] Project fields finalized.",
-    "[2026-02-11T21:34:54.496Z] Checking claim status before submission...",
-    "[2026-02-11T21:34:55.183Z] Submit blocked: human claim not yet completed. Claim code: eca01d3a-accf-4e9e-9c1a-da8ab0daeeb0. Will retry next run.",
-    "[2026-02-12T09:06:03.096Z] Checking claim status before submission...",
-    "[2026-02-12T09:06:04.219Z] Project already submitted. Marking stage as done."
+    "[2026-02-12T09:56:04.934Z] Updating Colosseum project with required fields and links...",
+    "[2026-02-12T09:56:06.004Z] Project fields finalized.",
+    "[2026-02-12T09:56:06.005Z] Checking claim status before submission...",
+    "[2026-02-12T09:56:06.734Z] ERROR: Submit failed: Project is already submitted"
   ]
 }
