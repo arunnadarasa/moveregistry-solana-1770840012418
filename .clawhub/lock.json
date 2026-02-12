@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "skills": {
+    "krump": {
+      "version": "1.0.4",
+      "installedAt": 1770768148499
+    },
+    "krumpklaw": {
+      "version": "1.0.1",
+      "installedAt": 1770768155569
+    },
+    "usdc-hackathon": {
+      "version": "1.0.15",
+      "installedAt": 1770769221447
+    },
+    "privy": {
+      "version": "1.0.1",
+      "installedAt": 1770769598365
+    }
+  }
+}

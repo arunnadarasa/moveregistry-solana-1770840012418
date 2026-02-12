@@ -1,0 +1,27 @@
+{
+  "stage": "submit",
+  "agentId": 3791,
+  "apiKey": "2ee19d4e93ba170739f687933d50f3281b8a8fa715e542762fa470c62c45097d",
+  "claimCode": "eca01d3a-accf-4e9e-9c1a-da8ab0daeeb0",
+  "walletAddress": "8YoyHPqn51Nbs1UNmsAKsVP6gj3WnQrg78c8pzMGdzhE",
+  "projectId": 649,
+  "repoName": "moveregistry-solana-1770845585155",
+  "repoUrl": "https://github.com/arunnadarasa/moveregistry-solana-1770845585155",
+  "liveAppLink": "https://moveregistry.vercel.app (deploy after hackathon)",
+  "presentationLink": "https://youtube.com/watch?v=... (to be recorded)",
+  "lastRunDate": "2026-02-11",
+  "logs": [
+    "[2026-02-11T21:33:05.155Z] Wallet address: 8YoyHPqn51Nbs1UNmsAKsVP6gj3WnQrg78c8pzMGdzhE. Ready to build.",
+    "[2026-02-11T21:33:05.157Z] Generating MoveRegistry code via OpenRouter (qwen-coder)...",
+    "[2026-02-11T21:34:51.054Z] Generated 7 files",
+    "[2026-02-11T21:34:51.055Z] Creating GitHub repository...",
+    "[2026-02-11T21:34:52.260Z] Pushing code to GitHub...",
+    "[2026-02-11T21:34:53.482Z] Build and GitHub push complete. Repo: https://github.com/arunnadarasa/moveregistry-solana-1770845585155",
+    "[2026-02-11T21:34:53.482Z] Creating Colosseum draft project...",
+    "[2026-02-11T21:34:53.483Z] Project 649 already exists. Skipping draft creation.",
+    "[2026-02-11T21:34:53.483Z] Updating Colosseum project with required fields and links...",
+    "[2026-02-11T21:34:54.495Z] Project fields finalized.",
+    "[2026-02-11T21:34:54.496Z] Checking claim status before submission...",
+    "[2026-02-11T21:34:55.183Z] Submit blocked: human claim not yet completed. Claim code: eca01d3a-accf-4e9e-9c1a-da8ab0daeeb0. Will retry next run."
+  ]
+}

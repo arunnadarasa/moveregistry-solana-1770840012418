@@ -1,0 +1,68 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import { useWallet, WalletMultiButton } from '@solana/wallet-adapter-react';
+import { Connection, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { Metaplex, bundlrStorage, keypairIdentity, Nft } from '@metaplex-foundation/js';
+
+const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.devnet.solana.com');
+const METAPLEX = Metaplex.make(connection).use(keypairIdentity(/* signer */)).use(bundlrStorage());
+
+export default function SkillMint() {
+  const { publicKey, signTransaction, sendTransaction } = useWallet();
+  const [skillName, setSkillName] = useState('');
+  const [skillExpression, setSkillExpression] = useState('');
+  const [royalty, setRoyalty] = useState(5);
+  const [mintedNft, setMintedNft] = useState<Nft | null>(null);
+  const programId = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID!);
+
+  const mintSkill = useCallback(async () => {
+    if (!publicKey || !signTransaction || !sendTransaction) return;
+
+    // Build the transaction to call our Anchor program
+    // This is a simplified example; the real transaction requires
+    // constructing the instruction with proper accounts and data.
+
+    const tx = new Transaction().add(
+      SystemProgram.nonceWipeAccount(SystemProgram.id, publicKey) // placeholder
+    );
+
+    // In a real implementation:
+    // - Derive SkillAccount PDA: seeds = ["skilldata", skillMint.key()]
+    // - Add instruction to create mint and metadata via Metaplex
+    // - Add instruction to initialize SkillAccount
+
+    const { blockhash } = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = publicKey;
+
+    const signed = await signTransaction(tx);
+    const signature = await sendTransaction(signed, connection);
+    await connection.confirmTransaction(signature);
+
+    // After minting, we would fetch the minted NFT from Metaplex
+    console.log('Minted with signature', signature);
+  }, [publicKey, signTransaction, sendTransaction]);
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>OpenClaw Dance Skill Registry — Mint Your Skill</h2>
+      <WalletMultiButton />
+      {publicKey && (
+        <form onSubmit={(e) => { e.preventDefault(); mintSkill(); }}>
+          <input placeholder="Skill name" value={skillName} onChange={e => setSkillName(e.currentTarget.value)} required />
+          <input placeholder="Expression (text DSL or video URL)" value={skillExpression} onChange={e => setSkillExpression(e.currentTarget.value)} required />
+          <label>Royalty %: <input type="number" min="0" max="100" value={royalty} onChange={e => setRoyalty(Number(e.currentTarget.value))} /></label>
+          <button type="submit">Mint Skill NFT</button>
+        </form>
+      )}
+      {mintedNft && (
+        <div>
+          <h3>Minted NFT</h3>
+          <p>Mint address: {mintedNft.address.toBase58()}</p>
+          <img src={mintedNft.json?.image} alt={mintedNft.name} />
+        </div>
+      )}
+    </div>
+  );
+}

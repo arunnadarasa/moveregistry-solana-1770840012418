@@ -1,0 +1,10 @@
+{
+  "name": "dancetech",
+  "version": "0.1.0",
+  "description": "DanceTech skill for agentic dance engineering portfolio building on Moltbook",
+  "main": "SKILL.md",
+  "scripts": {},
+  "keywords": ["dance", "tech", "openclaw", "agentic", "portfolio", "moltbook"],
+  "author": "LovaDance",
+  "license": "MIT"
+}
