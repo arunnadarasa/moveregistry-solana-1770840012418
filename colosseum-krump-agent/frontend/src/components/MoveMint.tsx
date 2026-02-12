@@ -73,10 +73,11 @@ export default function MoveMint() {
       transaction.feePayer = fromPubkey
 
       setStatus('Please sign the transaction in your wallet...')
-      // Privy's signTransaction returns SupportedSolanaTransaction (Transaction or VersionedTransaction)
+      // Privy's signTransaction expects connection and address, not wallet object
       const signedTx = await signTransaction({
         transaction,
-        wallet,
+        connection,
+        address: walletAddress,
       })
       // Serialize the signed transaction to send it
       const serializedTx = signedTx.serialize()
