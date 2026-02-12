@@ -2,6 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { atomicWrite, readJson } = require('../tools/file-utils');
+const { retryWithBackoff } = require('../tools/retry');
 
 // Load .env manually
 const envPath = path.join(__dirname, '..', '.env');
@@ -35,22 +37,64 @@ if (now > DEADLINE) {
   process.exit(0);
 }
 
+/**
+ * Validates that all required Colosseum submission fields are present
+ * @param {Object} projectData - The project data object
+ * @returns {Array<string>} - List of missing fields
+ */
+function validateColosseumSubmission(projectData) {
+  const requiredFields = [
+    'name',
+    'description',
+    'repoLink',
+    'solanaIntegration',
+    'problemStatement',
+    'technicalApproach',
+    'targetAudience',
+    'businessModel',
+    'competitiveLandscape',
+    'futureVision',
+    'tags'
+  ];
+
+  const missing = [];
+
+  for (const field of requiredFields) {
+    if (!projectData[field]) {
+      missing.push(field);
+    } else if (Array.isArray(projectData[field]) && projectData[field].length === 0) {
+      missing.push(`${field} (array is empty)`);
+    } else if (typeof projectData[field] === 'string' && projectData[field].trim() === '') {
+      missing.push(`${field} (empty string)`);
+    }
+  }
+
+  // Additional validations
+  if (projectData.tags && !Array.isArray(projectData.tags)) {
+    missing.push('tags must be an array');
+  }
+
+  return missing;
+}
+
 function loadState() {
-  if (!fs.existsSync(STATE_PATH)) return { stage: 'register', lastRunDate: null, logs: [] };
-  return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'));
+  return readJson(STATE_PATH, { stage: 'register', lastRunDate: null, logs: [] });
 }
 
 function saveState(state) {
-  fs.mkdirSync(path.dirname(STATE_PATH), { recursive: true });
-  fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2));
+  atomicWrite(STATE_PATH, state, true);
 }
 
 function log(state, msg) {
   const entry = `[${new Date().toISOString()}] ${msg}`;
   state.logs.push(entry);
   console.log(entry);
-  // Also append to rolling log file
-  fs.appendFileSync(LOG_PATH, entry + '\n');
+  // Also append to rolling log file using atomic write for the append
+  try {
+    fs.appendFileSync(LOG_PATH, entry + '\n');
+  } catch (error) {
+    console.warn('Failed to write to log file:', error.message);
+  }
 }
 
 // Simple OpenRouter call with timeout
@@ -264,32 +308,36 @@ function pushToGitHub(repoName, files) {
 }
 
 async function updateColosseumProject(state) {
-  const body = JSON.stringify({
-    name: PROJECT.name,
-    description: PROJECT.desc,
-    repoLink: state.repoUrl,
-    solanaIntegration: 'Metaplex NFT minting for move certificates, x402 payment gateway for verification fees, treasury PDA for royalties, Helius webhooks for indexing',
-    problemStatement: 'Krump dance creators lack reliable attribution and compensation when their signature moves are used by others. Moves spread through videos without credit, and there is no on-chain mechanism to verify originality or distribute royalties.',
-    technicalApproach: 'We deploy an Anchor program on Solana devnet that (1) mints an NFT representing a dance move with metadata (creator, video hash, move name); (2) Requires x402 micropayment to mark the move as "verified" (preventing spam); (3) Automatically distributes a percentage of subsequent licensing fees to the creator via a treasury PDA. Helius webhooks index move usage events for off-chain analytics.',
-    targetAudience: 'A Krump dancer who has created a signature move and wants to prove authorship and earn passive income when others use it. Also battle organizers who need to verify originality before competitions.',
-    businessModel: 'Mint fee: $0.10 (covers NFT storage). Verification fee: $0.01 x402 payment per authenticity check. Royalty: 5% of any future licensing transaction. Free tier: 1 mint per week; Pro: unlimited mints and on-chain governance participation.',
-    competitiveLandscape: 'OpenSea and general NFT platforms do not provide verification gating or automated royalties for move usage. POAPs are non-transferable souvenirs but cannot be licensed. No system focuses specifically on dance move attribution with micropayment verification.',
-    futureVision: 'V2 adds a DAO governed by move creators to set standards and fee parameters. V3 integrates with KrumpClaw to auto-register battle-winning moves. V4 implements a marketplace where moves can be licensed directly via on-chain offers. We intend to raise a seed round and build full-time, targeting the global dance community.',
-    tags: PROJECT.tags
-  });
-  const cmd = `curl -s -X PUT -H "Authorization: Bearer ${COLOSSEUM_API_KEY}" -H "Content-Type: application/json" -d '${body}' ${COLOSSEUM_API}/my-project`;
-  const respStr = execSync(cmd).toString();
-  const resp = JSON.parse(respStr);
-  if (resp.error) throw new Error(`Update project failed: ${resp.error}`);
-  return resp;
+  return await retryWithBackoff(async () => {
+    const body = JSON.stringify({
+      name: PROJECT.name,
+      description: PROJECT.desc,
+      repoLink: state.repoUrl,
+      solanaIntegration: 'Metaplex NFT minting for move certificates, x402 payment gateway for verification fees, treasury PDA for royalties, Helius webhooks for indexing',
+      problemStatement: 'Krump dance creators lack reliable attribution and compensation when their signature moves are used by others. Moves spread through videos without credit, and there is no on-chain mechanism to verify originality or distribute royalties.',
+      technicalApproach: 'We deploy an Anchor program on Solana devnet that (1) mints an NFT representing a dance move with metadata (creator, video hash, move name); (2) Requires x402 micropayment to mark the move as "verified" (preventing spam); (3) Automatically distributes a percentage of subsequent licensing fees to the creator via a treasury PDA. Helius webhooks index move usage events for off-chain analytics.',
+      targetAudience: 'A Krump dancer who has created a signature move and wants to prove authorship and earn passive income when others use it. Also battle organizers who need to verify originality before competitions.',
+      businessModel: 'Mint fee: $0.10 (covers NFT storage). Verification fee: $0.01 x402 payment per authenticity check. Royalty: 5% of any future licensing transaction. Free tier: 1 mint per week; Pro: unlimited mints and on-chain governance participation.',
+      competitiveLandscape: 'OpenSea and general NFT platforms do not provide verification gating or automated royalties for move usage. POAPs are non-transferable souvenirs but cannot be licensed. No system focuses specifically on dance move attribution with micropayment verification.',
+      futureVision: 'V2 adds a DAO governed by move creators to set standards and fee parameters. V3 integrates with KrumpClaw to auto-register battle-winning moves. V4 implements a marketplace where moves can be licensed directly via on-chain offers. We intend to raise a seed round and build full-time, targeting the global dance community.',
+      tags: PROJECT.tags
+    });
+    const cmd = `curl -s -X PUT -H "Authorization: Bearer ${COLOSSEUM_API_KEY}" -H "Content-Type: application/json" -d '${body}' ${COLOSSEUM_API}/my-project`;
+    const respStr = execSync(cmd).toString();
+    const resp = JSON.parse(respStr);
+    if (resp.error) throw new Error(`Update project failed: ${resp.error}`);
+    return resp;
+  }, 3, 2000); // 3 retries with 2s base backoff
 }
 
 async function submitProject(state) {
-  const cmd = `curl -s -X POST -H "Authorization: Bearer ${COLOSSEUM_API_KEY}" -H "Content-Type: application/json" ${COLOSSEUM_API}/my-project/submit`;
-  const respStr = execSync(cmd).toString();
-  const resp = JSON.parse(respStr);
-  if (resp.error) throw new Error(`Submit failed: ${resp.error}`);
-  return resp;
+  return await retryWithBackoff(async () => {
+    const cmd = `curl -s -X POST -H "Authorization: Bearer ${COLOSSEUM_API_KEY}" -H "Content-Type: application/json" ${COLOSSEUM_API}/my-project/submit`;
+    const respStr = execSync(cmd).toString();
+    const resp = JSON.parse(respStr);
+    if (resp.error) throw new Error(`Submit failed: ${resp.error}`);
+    return resp;
+  }, 3, 1000); // 3 retries with 1s base backoff
 }
 
 // Main state machine
@@ -393,7 +441,29 @@ async function submitProject(state) {
 
     // Stage 5: Finalize project details
     if (state.stage === 'finalize') {
-      log(state, 'Updating Colosseum project with required fields and links...');
+      log(state, 'Validating project fields before finalization...');
+      const projectData = {
+        name: PROJECT.name,
+        description: PROJECT.desc,
+        repoLink: state.repoUrl,
+        solanaIntegration: 'Metaplex NFT minting for move certificates, x402 payment gateway for verification fees, treasury PDA for royalties, Helius webhooks for indexing',
+        problemStatement: 'Krump dance creators lack reliable attribution and compensation when their signature moves are used by others. Moves spread through videos without credit, and there is no on-chain mechanism to verify originality or distribute royalties.',
+        technicalApproach: 'We deploy an Anchor program on Solana devnet that (1) mints an NFT representing a dance move with metadata (creator, video hash, move name); (2) Requires x402 micropayment to mark the move as "verified" (preventing spam); (3) Automatically distributes a percentage of subsequent licensing fees to the creator via a treasury PDA. Helius webhooks index move usage events for off-chain analytics.',
+        targetAudience: 'A Krump dancer who has created a signature move and wants to prove authorship and earn passive income when others use it. Also battle organizers who need to verify originality before competitions.',
+        businessModel: 'Mint fee: $0.10 (covers NFT storage). Verification fee: $0.01 x402 payment per authenticity check. Royalty: 5% of any future licensing transaction. Free tier: 1 mint per week; Pro: unlimited mints and on-chain governance participation.',
+        competitiveLandscape: 'OpenSea and general NFT platforms do not provide verification gating or automated royalties for move usage. POAPs are non-transferable souvenirs but cannot be licensed. No system focuses specifically on dance move attribution with micropayment verification.',
+        futureVision: 'V2 adds a DAO governed by move creators to set standards and fee parameters. V3 integrates with KrumpClaw to auto-register battle-winning moves. V4 implements a marketplace where moves can be licensed directly via on-chain offers. We intend to raise a seed round and build full-time, targeting the global dance community.',
+        tags: PROJECT.tags
+      };
+
+      const missingFields = validateColosseumSubmission(projectData);
+      if (missingFields.length > 0) {
+        log(state, `❌ Missing required fields: ${missingFields.join(', ')}`);
+        log(state, '   Fix and retry. Exiting.');
+        process.exit(1);
+      }
+
+      log(state, 'All required fields present. Updating Colosseum project...');
       await updateColosseumProject(state);
       log(state, 'Project fields finalized.');
       state.stage = 'submit';

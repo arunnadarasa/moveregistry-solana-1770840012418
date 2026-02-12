@@ -65,6 +65,37 @@ The script advances through stages: `register` → `wallet` → `draft` → `bui
 
 State is stored in `memory/colosseum-state.json` and logs in `memory/colosseum-log.json`.
 
+## Security
+
+This repository implements a **Security Railcard** system to prevent accidental exposure of API keys:
+
+- **Pre-commit hook**: Scans staged files for secret patterns; blocks commit if secrets found
+- **Pre-push hook**: Full repository scan before push (optional but recommended)
+- **Runtime scans**: Scripts like `update_colosseum.js` verify no secrets in deployment
+- **Strict .gitignore**: `.env` and sensitive files are excluded
+
+### Setup
+
+Hooks are automatically symlinked upon skill installation. Verify:
+```bash
+ls -la .git/hooks/pre-commit   # Should point to tools/security-check.js
+ls -la .git/hooks/pre-push    # Should point to tools/pre-push-security (optional)
+```
+
+Make executable if needed:
+```bash
+chmod +x tools/security-check.js tools/pre-push-security
+```
+
+### Manual Scan
+```bash
+node tools/security_railcard.js .
+```
+
+If blocked, remove hardcoded secrets and use environment variables instead.
+
+See `SECURITY_RAILCARD.md` for full documentation.
+
 ## Colosseum Submission Fields
 
 Before submission, ensure these fields are populated (the script handles this):

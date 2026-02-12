@@ -1,116 +1,106 @@
 # Security Railcard System
 
-## Overview
-
-The Security Railcard is a multi-layered defense system preventing API key and secret exposure in automated agent workflows. It combines pre-commit hooks, runtime scanning, and configuration best practices.
+This repository implements a multi-layer defense against API key exposure in automated workflows and commits.
 
 ## Components
 
-### 1. Pre-commit Hook (`.git/hooks/pre-commit`)
+### 1. Pre-commit Hook
+- Scans staged files for patterns matching real secrets
+- Blocks commit if any secrets detected
+- Allows placeholders (`your_`, `example`, `test_`, etc.)
+- Located at: `.git/hooks/pre-commit` → `tools/security-check.js`
 
-Automatically scans all staged files for patterns that look like real secrets before allowing a commit.
+### 2. Pre-push Hook (Optional)
+- Full repository scan before push
+- Prevents accidental secret leakage in any pushed files
+- Located at: `.git/hooks/pre-push` → `tools/pre-push-security`
+- To enable: `chmod +x tools/pre-push-security` (already set) and symlink exists
 
-**Installation:** The hook is automatically installed when you set up an agent workspace via the skill package. It's a symlink to `tools/pre-commit-security`.
+### 3. Runtime Scan
+- Scripts like `update_colosseum.js` call security scan before deployment
+- Integrated into CI/CD pipelines to catch issues early
 
-**What it scans for:**
-- OpenRouter API keys (`sk-or-v1-...`)
-- GitHub tokens (`ghp_`, `gho_`, etc.)
+### 4. Configuration Discipline
+- All secrets live in `.env` (gitignored)
+- Code uses `process.env.VAR_NAME` (never hardcoded)
+- `.env.example` contains only placeholders
+- `.gitignore` covers sensitive files
+
+## Patterns Detected
+
+- OpenRouter keys (`sk-or-v1-...`)
+- GitHub tokens (`ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_`)
 - Generic API keys/tokens
-- Private keys (hex)
+- Private keys (hex format)
 - Bearer tokens
+- Basic auth credentials
+- JWT-like strings
 - Moltbook keys
 - Privy app secrets
 
-**Placeholders allowed:** `your_`, `example`, `placeholder`, `changeme`, `xxx`, `replace`, `test_`, `dummy`
+## Exclusions
 
-### 2. Runtime Security Scan (`tools/security_railcard.js`)
+Scans exclude:
+- `node_modules/`
+- `.git/`
+- `dist/`, `build/`, `coverage/`
+- `.env.example` (only placeholders)
+- Documentation files (README, CHANGELOG, SECURITY_RAILCARD.md, docs/, examples/)
+- Image files (`.png`, `.jpg`, etc.)
 
-Called by automation scripts (`dancetech_cycle.js`, `colosseum_cycle.js`) before pushing generated code to GitHub. Scans the entire temporary build directory.
+## Usage
 
-**Exits 0** if safe, **1** if secrets detected.
+### Manual Scan
+```bash
+# Scan entire workspace
+node tools/security_railcard.js .
 
-**Excluded paths:** `node_modules/`, `.git/`, `dist/`, `build/`, `coverage/`, `.env.example`, `README.md`, documentation, images, tests.
-
-### 3. Environment-Based Configuration
-
-All sensitive credentials are stored in `.env` (gitignored) and loaded at runtime:
-
-```
-OPENROUTER_API_KEY=
-GITHUB_PUBLIC_TOKEN=
-MOLTBOOK_API_KEY=
-PRIVY_APP_ID=
-PRIVY_APP_SECRET=
-```
-
-Code that needs these values uses `process.env.VAR_NAME` (Node.js) or equivalent.
-
-### 4. Safe Configuration Files
-
-Files like `models.json` should contain placeholders, not real values. The agent loads environment variables and injects them at runtime, not from config.
-
-Example `models.json`:
-```json
-{
-  "providers": {
-    "openrouter": {
-      "baseUrl": "https://openrouter.ai/api/v1",
-      "apiKey": "",  // Filled from .env at runtime
-      "models": [...]
-    }
-  }
-}
+# Scan specific files
+node tools/security_railcard.js file1.js file2.json
 ```
 
-## Usage for Developers
+### Pre-commit (Automatic)
+Automatically runs on `git commit`. If secrets are detected, commit is blocked.
 
-### When creating new automation scripts:
+### Pre-push (Optional)
+Automatically runs on `git push`. To enable/disable:
+```bash
+# Enable
+ln -sf tools/pre-push-security .git/hooks/pre-push
 
-1. **Before pushing to GitHub:**
-   ```javascript
-   const railcardPath = path.join(WORKSPACE, 'tools', 'security_railcard.js');
-   const scanCmd = `node "${railcardPath}" "${tempDir}"`;
-   const scanResult = execSync(scanCmd, { encoding: 'utf8' });
-   if (!scanResult.includes('No secrets')) {
-     throw new Error('Security railcard blocked push');
-   }
-   ```
+# Disable
+rm .git/hooks/pre-push
+```
 
-2. **Keep .env patterns:**
-   - Never commit `.env`
-   - Use `.env.example` with placeholder values for documentation
+## If Blocked
 
-### If the railcard blocks your commit:
+1. Identify the file and line number from the error message
+2. Replace any hardcoded secret with an environment variable reference
+3. Ensure the secret is stored only in `.env` (gitignored)
+4. Re-stage and try again
 
-1. Identify the file and line from the error message.
-2. Replace the real secret with a placeholder or move it to `.env`.
-3. Use `process.env.YOUR_KEY` in code instead of hardcoding.
-4. Re-stage and commit.
+## Emergency Override
 
-## Recovery from Exposure (like the 2026-02-12 incident)
-
-1. Immediately revoke the exposed key at the source (OpenRouter, GitHub, etc.)
-2. Generate a new key
-3. Update `.env` files in all agent workspaces
-4. Verify that no config file (`models.json`, `config.json`, etc.) contains the old key
-5. Check git history: if the key was committed, use `git filter-branch` or BFG to purge it
-6. Rotate all other credentials that might share patterns
+In rare cases where a false positive occurs, you can:
+- Use `git commit --no-verify` to bypass pre-commit (use with extreme caution)
+- Update the exclusion patterns in `tools/security_railcard.js` if the pattern is too broad
 
 ## Maintenance
 
-To update secret patterns, edit `SECRET_PATTERNS` array in `tools/security_railcard.js`.
+- Review and update `SECRET_PATTERNS` regularly as new credential formats emerge
+- Add project-specific exclusions to `EXCLUDED_PATHS` as needed
+- Keep `dotenv` dependency updated: `npm update dotenv`
 
-Add new regex patterns for any credential types you introduce.
+## Incident Response
 
-## Testing
+If a secret is accidentally committed:
+1. **Rotate the compromised credential immediately**
+2. Purge it from git history with `git filter-branch` or BFG
+3. Document the incident in `MEMORY.md`
+4. Review and improve security railcard patterns if needed
 
-Run a manual scan:
-```bash
-node tools/security_railcard.js .
-```
+## References
 
-Test the pre-commit hook by staging a file containing a fake key like:
-```javascript
-const key = 'sk-or-v1-fakebutlongenoughstring1234567890';
-```
-The hook should block the commit.
+- [GitHub Secret Scanning](https://docs.github.com/code-security/secret-scanning)
+- [OpenRouter API Security](https://openrouter.ai/docs/security)
+- [OWASP Credential Management](https://cheatsheetseries.owasp.org/cheatsheets/Credentials_Storage_Cheat_Sheet.html)

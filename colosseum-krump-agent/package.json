@@ -1,0 +1,28 @@
+{
+  "name": "colosseum-krump-agent",
+  "version": "1.0.0",
+  "description": "Colosseum Agent Hackathon - MoveRegistry for Krump dance moves on Solana",
+  "main": "index.js",
+  "scripts": {
+    "update:colosseum": "node update_colosseum.js",
+    "test": "echo \"No tests yet\" && exit 0",
+    "lint": "echo \"No linting configured\" && exit 0",
+    "security:scan": "node tools/security_railcard.js ."
+  },
+  "keywords": [
+    "krump",
+    "solana",
+    "colosseum",
+    "hackathon",
+    "nft",
+    "x402"
+  ],
+  "author": "Asura (Arun Nadarasa)",
+  "license": "MIT",
+  "devDependencies": {
+    "dotenv": "^16.6.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

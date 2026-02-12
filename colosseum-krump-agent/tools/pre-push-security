@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+/**
+ * Pre-push hook: Security Railcard
+ * Runs full repository scan before push to prevent secret leakage
+ * This complements the pre-commit hook by scanning all files being pushed
+ */
+
+const { execSync } = require('child_process');
+const path = require('path');
+
+const WORKSPACE = path.resolve(__dirname, '..');
+const RAILCARD_PATH = path.join(WORKSPACE, 'tools', 'security_railcard.js');
+
+try {
+  // Get all files that are being pushed (not just committed)
+  const stdout = execSync('git diff --cached --name-only', {
+    cwd: WORKSPACE,
+    encoding: 'utf8'
+  });
+  const stagedFiles = stdout.split('\n').filter(f => f.trim());
+
+  if (stagedFiles.length === 0) {
+    console.log('\n🛡️  Pre-push security check: No files to push.\n');
+    process.exit(0);
+  }
+
+  console.log(`\n🛡️  Pre-push Security Railcard: Scanning ${stagedFiles.length} file(s) before push...\n`);
+
+  // Run security scan on all staged files
+  const scanResult = execSync(`node "${RAILCARD_PATH}" "${stagedFiles.join(' ')}"`, {
+    cwd: WORKSPACE,
+    encoding: 'utf8'
+  });
+
+  console.log(scanResult);
+
+  // Check if railcard reported any secrets
+  if (scanResult.includes('❌ SECRETS DETECTED') || scanResult.includes('❌ Blocked')) {
+    console.error('\n❌ Push blocked due to potential secret exposure.');
+    console.error('   Fix the issues above and try again.\n');
+    process.exit(1);
+  }
+
+  console.log('✅ Pre-push security check passed. Safe to push.\n');
+  process.exit(0);
+
+} catch (error) {
+  if (error.statusCode === 1) {
+    // Railcard already printed error message
+    process.exit(1);
+  }
+  console.error('\n❌ Pre-push security check failed with error:', error.message);
+  console.error('   Please investigate and try again.\n');
+  process.exit(1);
+}
