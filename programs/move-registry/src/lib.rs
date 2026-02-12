@@ -1,9 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Token, TokenAccount, Transfer, Mint};
-use mpl_token_metadata::state::{Metadata, TokenMetadataAccount};
-use solana_program::borsh;
+use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 
-declare_id!("YOUR_PROGRAM_ID_HERE");
+declare_id!("Dp2JcVDt4seef6LbPCtoHiD5nrHkRUFHJdBPdCUTVeDQ");
 
 #[program]
 pub mod move_registry {
@@ -28,12 +26,12 @@ pub mod move_registry {
         // Initialize SkillAccount
         let skill_data = &mut ctx.accounts.skill_data;
         skill_data.creator = ctx.accounts.creator.key();
-        skill_data.skill_name = skill_name;
+        skill_data.skill_name = skill_name.clone();
         skill_data.expression = expression;
         skill_data.timestamp = now;
         skill_data.royalty_percent = royalty_percent;
         skill_data.verified = false;
-        skill_data.mint = ctx.accounts.move_mint.key();
+        skill_data.mint = ctx.accounts.skill_mint.key();
         skill_data.treasury = *treasury.key;
 
         // NFT metadata already created via Metaplex instruction (outside program)
@@ -41,7 +39,7 @@ pub mod move_registry {
 
         emit!(SkillMinted {
             creator: ctx.accounts.creator.key(),
-            mint: ctx.accounts.move_mint.key(),
+            mint: ctx.accounts.skill_mint.key(),
             skill_name: skill_name.clone(),
         });
 
@@ -52,12 +50,12 @@ pub mod move_registry {
     /// The program marks the move as verified.
     pub fn verify_skill(ctx: Context<VerifyMove>) -> Result<()> {
         let skill_data = &mut ctx.accounts.skill_data;
-        require!(!skill_data.verified, AlreadyVerified);
+        require!(!skill_data.verified, MoveRegistryError::AlreadyVerified);
 
         // Payment verification is handled off‑chain via x402; here we just trust the caller.
         // In production, you would validate a signed payment proof.
         let verifier = &ctx.accounts.verifier;
-        msg!("Move verified by {}", verifier);
+        msg!("Move verified by {}", verifier.key());
 
         skill_data.verified = true;
         emit!(SkillVerified { mint: skill_data.mint });
@@ -69,7 +67,7 @@ pub mod move_registry {
     /// The treasury takes a small platform fee if desired.
     pub fn license_skill(ctx: Context<LicenseMove>, amount: u64) -> Result<()> {
         let skill_data = &ctx.accounts.skill_data;
-        require!(skill_data.verified, NotVerified);
+        require!(skill_data.verified, MoveRegistryError::NotVerified);
         let creator = skill_data.creator;
         let royalty_percent = skill_data.royalty_percent as u64;
         let royalty_amount = amount * royalty_percent / 100;
@@ -151,20 +149,18 @@ pub struct LicenseMove<'info> {
 
 /// Move metadata stored on-chain
 #[account]
-#[derive(Clone, Debug, PartialEq, InitSpace)]
+#[derive(Debug, PartialEq, InitSpace)]
 pub struct SkillAccount {
     pub creator: Pubkey,
-    pub skill_name: String,    // max 64?
+    #[max_len(64)]
+    pub skill_name: String,    // max 64 chars
+    #[max_len(128)]
     pub expression: String,   // IPFS CID or Arweave hash
     pub timestamp: i64,
     pub royalty_percent: u8,
     pub verified: bool,
     pub mint: Pubkey,
     pub treasury: Pubkey,
-}
-
-impl SkillAccount {
-    const INIT_SPACE: usize = 8 + (32 * 2) + (8 * 2) + 1 + 1 + 32 * 2; // rough; adjust
 }
 
 /// Events
@@ -186,4 +182,12 @@ pub struct SkillLicensed {
     pub payer: Pubkey,
     pub amount: u64,
     pub royalty: u64,
+}
+
+#[error_code]
+pub enum MoveRegistryError {
+    #[msg("Skill already verified")]
+    AlreadyVerified,
+    #[msg("Skill not verified")]
+    NotVerified,
 }

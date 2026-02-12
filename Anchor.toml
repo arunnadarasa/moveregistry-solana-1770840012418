@@ -1,13 +1,18 @@
 [features]
 seeds = false
 skip-lint = false
+verifiable = false
 
 [programs.devnet]
-move-registry = "YOUR_PROGRAM_ID"
+move-registry = "11111111111111111111111111111111"
 
 [provider]
 cluster = "devnet"
-wallet = "~/.config/solana/id.json"
+wallet = "/Users/openclaw/.config/solana/deployer-key.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[toolchain]
+anchor_version = "0.32.1"
+

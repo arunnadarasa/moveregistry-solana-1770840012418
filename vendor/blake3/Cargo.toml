@@ -1,0 +1,22 @@
+[package]
+name = "blake3"
+version = "1.8.3"
+edition = "2021"
+license = "CC0-1.0 OR MIT OR Apache-2.0"
+description = "Compat shim for blake3 1.8.3 without edition2024 manifest feature"
+repository = "https://github.com/BLAKE3-team/BLAKE3"
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+default = ["std"]
+std = []
+rayon = []
+serde = []
+mmap = []
+traits-preview = ["digest"]
+
+[dependencies]
+digest = { version = "0.10", optional = true }
+
