@@ -148,8 +148,9 @@ Both systems run as **isolated sessions** via OpenClaw native cron, ensuring fre
 - ✅ Pre-commit hook installed in `krump-agent`, `dance-tech-agent`, `colosseum-krump-agent`
 - ✅ `dancetech_cycle.js` and `colosseum_cycle.js` call security scan before push
 - ✅ `.gitignore` strengthened across all agents
+- ✅ `dance-agentic-engineer` skill v0.1.2 published with Security Railcard
 - ⏳ Pending: Manual key rotation (new OpenRouter key needed) on 2026-02-13
-- ✅ Security railcard integrated into `dance-agentic-engineer` skill v0.1.2 (upcoming)
+- ✅ ClawHub compatibility: pre-commit hook stored as non-executable (users run `chmod +x` after install)
 
 ## Credentials
 
@@ -166,9 +167,10 @@ Both systems run as **isolated sessions** via OpenClaw native cron, ensuring fre
 - League tracker added; will post first weekly summary on Sunday (10 AM).
 - Once auth profiles are configured, may switch to dedicated krump-agent sessions.
 
-## Skill Packaging (2026-02-11)
+## Skill Packaging
 
-Created reusable OpenClaw skill **"dance-agentic-engineer"** (v0.1.1) containing:
+### 2026-02-11 — v0.1.1
+Created reusable OpenClaw skill **"dance-agentic-engineer"** containing:
 - 8 automation scripts
 - `.env.example` and `agent.yaml`
 - `references/script-reference.md` technical docs
@@ -176,7 +178,14 @@ Created reusable OpenClaw skill **"dance-agentic-engineer"** (v0.1.1) containing
 - `README.md` for GitHub browsing
 
 **GitHub repo:** https://github.com/arunnadarasa/dance-agentic-engineer-skill  
-**Latest release:** https://github.com/arunnadarasa/dance-agentic-engineer-skill/releases/latest  
-**Skill file:** https://github.com/arunnadarasa/dance-agentic-engineer-skill/releases/download/v0.1.1/dance-agentic-engineer.skill
+**Latest release:** https://github.com/arunnadarasa/dance-agentic-engineer-skill/releases/latest
+
+### 2026-02-12 — v0.1.2 (Security Railcard)
+- Added `scripts/tools/security_railcard.js` — automated secret scanner
+- Added `scripts/tools/pre-commit-security` (non-executable for ClawHub, users must `chmod +x`)
+- Updated `dancetech_post.js` to run security scan before GitHub push
+- Added `SECURITY_RAILCARD.md` documentation
+- Updated SKILL.md with security setup instructions
+- Strengthened `.gitignore` and `.env.example`
 
 Ready for ClawHub upload so other dancers can spawn their own agentic dance engineer.

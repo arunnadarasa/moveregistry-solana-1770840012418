@@ -10,7 +10,7 @@ The Security Railcard is a multi-layered defense system preventing API key and s
 
 Automatically scans all staged files for patterns that look like real secrets before allowing a commit.
 
-**Installation:** The hook is automatically installed when you set up an agent workspace via the skill package. It's a symlink to `tools/pre-commit-security`.
+**Installation:** The hook is automatically installed when you set up an agent workspace via the skill package. It's a symlink to `scripts/tools/security-check.js`.
 
 **What it scans for:**
 - OpenRouter API keys (`sk-or-v1-...`)
@@ -23,7 +23,7 @@ Automatically scans all staged files for patterns that look like real secrets be
 
 **Placeholders allowed:** `your_`, `example`, `placeholder`, `changeme`, `xxx`, `replace`, `test_`, `dummy`
 
-### 2. Runtime Security Scan (`tools/security_railcard.js`)
+### 2. Runtime Security Scan (`scripts/tools/security_railcard.js`)
 
 Called by automation scripts (`dancetech_cycle.js`, `colosseum_cycle.js`) before pushing generated code to GitHub. Scans the entire temporary build directory.
 
@@ -68,7 +68,7 @@ Example `models.json`:
 
 1. **Before pushing to GitHub:**
    ```javascript
-   const railcardPath = path.join(WORKSPACE, 'tools', 'security_railcard.js');
+   const railcardPath = path.join(WORKSPACE, 'scripts', 'tools', 'security_railcard.js');
    const scanCmd = `node "${railcardPath}" "${tempDir}"`;
    const scanResult = execSync(scanCmd, { encoding: 'utf8' });
    if (!scanResult.includes('No secrets')) {
@@ -98,15 +98,15 @@ Example `models.json`:
 
 ## Maintenance
 
-To update secret patterns, edit `SECRET_PATTERNS` array in `tools/security_railcard.js`.
+To update secret patterns, edit `SECRET_PATTERNS` array in `scripts/tools/security_railcard.js`.
 
 Add new regex patterns for any credential types you introduce.
 
 ## Testing
 
-Run a manual scan:
+Run a manual scan from the skill root:
 ```bash
-node tools/security_railcard.js .
+node scripts/tools/security_railcard.js .
 ```
 
 Test the pre-commit hook by staging a file containing a fake key like:

@@ -3,7 +3,7 @@
  * Pre-commit hook: Security Railcard
  * Blocks commits that contain exposed API keys or secrets
  *
- * Install: ln -sf ../../tools/pre-commit-security .git/hooks/pre-commit
+ * Install: ln -sf ../../tools/security-check.js .git/hooks/pre-commit
  */
 
 const { execSync } = require('child_process');

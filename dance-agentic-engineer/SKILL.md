@@ -31,7 +31,8 @@ All orchestrated via OpenClaw's native cron. No external schedulers needed.
 - GitHub account with public repo token
 - Optional: Privy credentials for Agentic Commerce wallet stubs
 
-## Configuration
+
+- `OPENROUTER_API_KEY` (OpenRouter API key for code generation)## Configuration
 
 Add to your `TOOLS.md`:
 
@@ -59,15 +60,15 @@ This skill includes a **Security Railcard** system to prevent API key exposure i
 
 - `scripts/tools/security_railcard.js` — scans files for leaked secrets
 - `scripts/tools/pre-commit-security` — Git pre-commit hook that blocks commits containing real API keys
-- Automatic scanning in `dancetech_post.js` and `colosseum_cycle.js` before pushing to GitHub
+- Automatic scanning in `dancetech_post.js` before pushing to GitHub
 
 ### Setup
 
 1. After installing the skill, ensure the pre-commit hook is active:
    ```bash
    cd /path/to/agent/workspace
-   ln -sf scripts/tools/pre-commit-security .git/hooks/pre-commit
-   chmod +x .git/hooks/pre-commit
+   chmod +x scripts/tools/security-check.js   # Make executable (required on some systems)
+   ln -sf scripts/tools/security-check.js .git/hooks/pre-commit
    ```
 
 2. Test the hook:
@@ -88,7 +89,7 @@ This skill includes a **Security Railcard** system to prevent API key exposure i
 
 ### Incident Response (Key Exposure)
 
-If a key was ever exposed (like the 2026-02-12 OpenRouter incident):
+If a key was ever exposed:
 1. Immediately revoke the key at the provider
 2. Generate a new key
 3. Update all `.env` files in your agent workspaces
@@ -96,8 +97,6 @@ If a key was ever exposed (like the 2026-02-12 OpenRouter incident):
 5. Run `node scripts/tools/security_railcard.js .` to scan the entire workspace
 
 See full documentation: `SECURITY_RAILCARD.md` in the skill root.
-
----
 
 ## Usage
 
@@ -278,3 +277,10 @@ MIT — use, modify, share freely. Credit appreciated but not required.
 *Built by LovaDance (Asura) — Prince Yarjack of Easyar Fam, Angel of Indian Krump*
 
 *"Kindness Over Everything"* 🔥
+
+## Security Considerations
+
+- This skill requires a GitHub token with `public_repo` scope. Use a dedicated account and token, not your primary account.
+- The token is passed to git via a temporary askpass script to avoid exposing it in process listings.
+- Moltbook API key and OpenRouter API key are also required; treat them as secrets.
+- The skill creates many GitHub repos and posts frequently; test with a throwaway Moltbook account and GitHub account before using production accounts.

@@ -27,6 +27,14 @@ const PROJECT = {
   tags: ['ai', 'infra', 'identity']
 };
 
+// Deadline: stop after Feb 13, 2026
+const DEADLINE = new Date('2026-02-13T23:59:59');
+const now = new Date();
+if (now > DEADLINE) {
+  console.log('⏰ Colosseum hackathon deadline (2026-02-13) has passed. Agent exiting.');
+  process.exit(0);
+}
+
 function loadState() {
   if (!fs.existsSync(STATE_PATH)) return { stage: 'register', lastRunDate: null, logs: [] };
   return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'));

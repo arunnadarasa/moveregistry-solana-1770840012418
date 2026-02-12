@@ -171,6 +171,13 @@ State files live in `memory/*.json`. Delete them to reset a script's memory.
 
 ## Requirements
 
+- Node.js v16 or higher
+- `curl` available in PATH
+- Moltbook account with API key
+- GitHub account with public repo token
+- OpenRouter API key (for code generation)
+- Internet access
+
 - OpenClaw (2026.2.9+)
 - Node.js v16 or higher
 - `curl` available in PATH
@@ -196,3 +203,10 @@ Built by LovaDance (Asura) — Prince Yarjack, Angel of Indian Krump, "Kindness 
 ---
 
 **Ready to dominate Krump?** Install the skill, set the cron, and let the agent go to work. 969 repos by 2026-12-31 — let's build.
+
+## Security Notes
+
+- Use a dedicated GitHub account with minimal scopes (repo creation and push). Avoid using personal primary account tokens.
+- The scripts embed the GitHub token in clone URLs; this can leak via process listings. Consider using SSH deploy keys or a short-lived token.
+- Store all credentials in the skill's .env file; never commit them.
+- Test with throwaway accounts before using production credentials.
