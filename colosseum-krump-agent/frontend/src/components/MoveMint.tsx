@@ -126,7 +126,7 @@ export default function MoveMint() {
               // This should detect Phantom if installed
               connectWallet({
                 walletList: ['phantom', 'detected_solana_wallets'],
-                walletChainType: 'solana',
+                walletChainType: 'solana-only',
               })
             }}
             style={{
