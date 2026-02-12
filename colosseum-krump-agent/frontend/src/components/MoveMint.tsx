@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { usePrivy, useWallets, useConnectWallet } from '@privy-io/react-auth';
 import { useSignTransaction } from '@privy-io/react-auth/solana';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { Buffer } from 'buffer';
@@ -14,6 +14,7 @@ const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID || 'Dp2JcVDt
 export default function MoveMint() {
   const { ready, authenticated, login, logout, user } = usePrivy()
   const { wallets } = useWallets()
+  const { connectWallet } = useConnectWallet()
   const { signTransaction } = useSignTransaction()
   const [moveName, setMoveName] = useState('')
   const [videoHash, setVideoHash] = useState('')
@@ -120,7 +121,20 @@ export default function MoveMint() {
       <div style={{ marginBottom: '1rem' }}>
         {!authenticated ? (
           <button
-            onClick={() => login()}
+            onClick={() => {
+              // Try connecting wallet first (for browser extensions), fallback to login
+              if (connectWallet) {
+                connectWallet({
+                  walletList: ['phantom', 'detected_solana_wallets'],
+                  walletChainType: 'solana',
+                }).catch(() => {
+                  // Fallback to login if connectWallet fails
+                  login()
+                })
+              } else {
+                login()
+              }
+            }}
             style={{
               padding: '0.75rem 1.5rem',
               borderRadius: 8,
