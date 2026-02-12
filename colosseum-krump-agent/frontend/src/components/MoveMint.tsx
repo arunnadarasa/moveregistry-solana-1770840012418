@@ -34,6 +34,13 @@ export default function MoveMint() {
     return solanaWallet || null
   }, [wallets])
 
+  // Check if connected wallet is Solana
+  const connectedWallet = getWallet()
+  const connectedAddress = connectedWallet 
+    ? (connectedWallet as any).address || (connectedWallet as any).walletClient?.address 
+    : null
+  const isEthereumWallet = connectedAddress && connectedAddress.startsWith('0x')
+
   const mintMove = useCallback(async () => {
     if (!authenticated) {
       setStatus('Please connect your wallet first.')
@@ -150,6 +157,42 @@ export default function MoveMint() {
         <p style={{ textAlign: 'center', opacity: 0.7 }}>
           Connect your wallet to mint a dance move NFT on Solana devnet.
         </p>
+      ) : isEthereumWallet ? (
+        <div style={{
+          padding: '1rem',
+          borderRadius: 8,
+          background: 'rgba(255, 165, 0, 0.1)',
+          border: '1px solid rgba(255, 165, 0, 0.3)',
+          marginBottom: '1rem',
+        }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontWeight: 600, color: '#ffa500' }}>
+            ⚠️ Ethereum Wallet Detected
+          </p>
+          <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.9 }}>
+            You're connected with an Ethereum wallet ({connectedAddress?.slice(0, 6)}...{connectedAddress?.slice(-4)}).
+            This dApp requires a <strong>Solana wallet</strong>.
+          </p>
+          <ol style={{ margin: '0.75rem 0 0 0', paddingLeft: '1.5rem', fontSize: '0.85rem', opacity: 0.9 }}>
+            <li>Open your Phantom wallet extension</li>
+            <li>Click the network selector at the top</li>
+            <li>Switch from "Sepolia" to <strong>"Devnet"</strong> (Solana)</li>
+            <li>Disconnect and reconnect here, or refresh the page</li>
+          </ol>
+          <button
+            onClick={() => logout()}
+            style={{
+              marginTop: '1rem',
+              padding: '0.5rem 1rem',
+              borderRadius: 8,
+              border: '1px solid rgba(255, 165, 0, 0.5)',
+              background: 'rgba(255, 165, 0, 0.2)',
+              color: '#ffa500',
+              cursor: 'pointer',
+            }}
+          >
+            Disconnect & Switch to Solana
+          </button>
+        </div>
       ) : (
         <form onSubmit={(e) => { e.preventDefault(); mintMove(); }}>
           <div style={{ marginBottom: '1rem' }}>

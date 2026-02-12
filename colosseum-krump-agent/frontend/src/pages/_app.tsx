@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app'
 import { PrivyProvider } from '@privy-io/react-auth'
+import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana'
 import '../../styles/globals.css'
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -11,6 +12,7 @@ export default function App({ Component, pageProps }: AppProps) {
         appearance: {
           theme: 'dark',
           accentColor: '#00dbde',
+          walletChainType: 'solana-only', // Only show Solana wallets
         },
         // Configure Solana support
         solana: {
@@ -18,6 +20,12 @@ export default function App({ Component, pageProps }: AppProps) {
             'solana:devnet': {
               rpc: 'https://api.devnet.solana.com',
             },
+          },
+        },
+        // Configure external Solana wallet connectors
+        externalWallets: {
+          solana: {
+            connectors: toSolanaWalletConnectors(),
           },
         },
       }}
