@@ -4,6 +4,25 @@ On-chain registry for OpenClaw dance skills — turning human choreography into 
 
 [![Colosseum Agent Hackathon](https://img.shields.io/badge/Colosseum-Agent%20Hackathon-blue)](https://colosseum.com/agent-hackathon)
 
+---
+
+## 🚀 Live Demo
+
+**Try it now:** https://moveregistry.lovable.app/
+
+The frontend is deployed and working on Solana devnet. Connect your wallet (Phantom/Solflare) and mint a move NFT to see the on‑chain transaction in action.
+
+---
+
+## Quick Links
+
+- **Frontend Repo**: https://github.com/arunnadarasa/moveregistry-frontend
+- **Live Demo**: https://moveregistry.lovable.app/
+- **Backend Repo**: (this repository)
+- **Colosseum Project ID**: 649
+
+---
+
 ## The Problem
 
 Dancers and choreographers create incredible moves, but in the age of AI and robotics, their creativity is easily copied and monetized by others. There's no standardized, trust‑less way to:
