@@ -18,6 +18,7 @@ The frontend is deployed and working on Solana devnet. Connect your wallet (Phan
 
 - **Frontend Repo**: https://github.com/arunnadarasa/moveregistry-frontend
 - **Live Demo**: https://moveregistry.lovable.app/
+- **Video Pitch**: https://www.youtube.com/watch?v=R-xgguVW-us
 - **Backend Repo**: (this repository)
 - **Colosseum Project ID**: 649
 
