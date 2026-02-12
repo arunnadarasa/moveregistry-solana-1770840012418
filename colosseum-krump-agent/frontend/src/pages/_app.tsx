@@ -12,6 +12,14 @@ export default function App({ Component, pageProps }: AppProps) {
           theme: 'dark',
           accentColor: '#00dbde',
         },
+        // Configure Solana support
+        solana: {
+          rpcs: {
+            'solana:devnet': {
+              rpc: 'https://api.devnet.solana.com',
+            },
+          },
+        },
       }}
     >
       <Component {...pageProps} />
