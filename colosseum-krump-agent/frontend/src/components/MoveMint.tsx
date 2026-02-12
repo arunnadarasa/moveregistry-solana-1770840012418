@@ -138,10 +138,8 @@ export default function MoveMint() {
                   }
                   
                   // Use login() for initial authentication (connectWallet is for linking to authenticated users)
-                  // login() will show the Privy modal which should detect Phantom
-                  await login({
-                    walletList: ['phantom', 'detected_solana_wallets'],
-                  })
+                  // login() will show the Privy modal which should detect Phantom based on PrivyProvider config
+                  await login()
                   
                   setIsConnecting(false)
                 } catch (error: any) {
