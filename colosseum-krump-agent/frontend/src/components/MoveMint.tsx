@@ -127,24 +127,23 @@ export default function MoveMint() {
                 setIsConnecting(true)
                 setStatus('')
                 try {
-                  // Check if Phantom is installed
-                  if (typeof window !== 'undefined' && (window as any).solana?.isPhantom) {
-                    setStatus('Phantom detected. Connecting...')
+                  // Check if Phantom is installed and available
+                  const phantom = typeof window !== 'undefined' ? (window as any).solana : null
+                  if (phantom?.isPhantom) {
+                    setStatus('Phantom detected. Please approve the connection in Phantom...')
+                  } else {
+                    setStatus('⚠️ Phantom wallet not detected. Please install Phantom extension.')
+                    setIsConnecting(false)
+                    return
                   }
                   
-                  // Use connectWallet for better browser extension detection
-                  await connectWallet({
+                  // Use login() for initial authentication (connectWallet is for linking to authenticated users)
+                  // login() will show the Privy modal which should detect Phantom
+                  await login({
                     walletList: ['phantom', 'detected_solana_wallets'],
-                    walletChainType: 'solana-only',
                   })
                   
-                  // If connectWallet doesn't throw, check if we got a wallet
-                  setTimeout(() => {
-                    if (!authenticated) {
-                      setStatus('⚠️ Connection timeout. Please ensure Phantom is unlocked and try again.')
-                    }
-                    setIsConnecting(false)
-                  }, 5000)
+                  setIsConnecting(false)
                 } catch (error: any) {
                   console.error('Wallet connection error:', error)
                   setStatus(`❌ Connection failed: ${error.message || 'Please ensure Phantom is installed and unlocked'}`)
