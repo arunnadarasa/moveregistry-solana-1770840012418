@@ -36,8 +36,10 @@ export default function MoveMint() {
 
     try {
       setStatus('Preparing transaction...')
-      const wallet = getWallet()
-      if (!wallet) throw new Error('Wallet not available')
+      const baseWallet = getWallet()
+      if (!baseWallet) throw new Error('Wallet not available')
+      // Privy wallet typing doesn't expose Solana-specific fields, so we cast here.
+      const wallet: any = baseWallet
 
       // Derive treasury PDA: seeds = ["treasury"]
       const treasuryPDA = PublicKey.findProgramAddressSync(
