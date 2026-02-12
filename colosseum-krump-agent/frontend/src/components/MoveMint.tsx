@@ -21,6 +21,7 @@ export default function MoveMint() {
   const [royalty, setRoyalty] = useState(5)
   const [status, setStatus] = useState('')
   const [txSignature, setTxSignature] = useState<string | null>(null)
+  const [isConnecting, setIsConnecting] = useState(false)
 
   const getWallet = useCallback(() => {
     if (!wallets || wallets.length === 0) return null
@@ -120,26 +121,57 @@ export default function MoveMint() {
     <div>
       <div style={{ marginBottom: '1rem' }}>
         {!authenticated ? (
-          <button
-            onClick={() => {
-              // Use connectWallet for better browser extension detection
-              // This should detect Phantom if installed
-              connectWallet({
-                walletList: ['phantom', 'detected_solana_wallets'],
-                walletChainType: 'solana-only',
-              })
-            }}
-            style={{
-              padding: '0.75rem 1.5rem',
-              borderRadius: 8,
-              border: 'none',
-              background: 'linear-gradient(90deg, #00dbde, #fc00ff)',
-              color: '#fff',
-              fontWeight: 700,
-            }}
-          >
-            Connect Wallet (Privy)
-          </button>
+          <div>
+            <button
+              onClick={async () => {
+                setIsConnecting(true)
+                setStatus('')
+                try {
+                  // Check if Phantom is installed
+                  if (typeof window !== 'undefined' && (window as any).solana?.isPhantom) {
+                    setStatus('Phantom detected. Connecting...')
+                  }
+                  
+                  // Use connectWallet for better browser extension detection
+                  await connectWallet({
+                    walletList: ['phantom', 'detected_solana_wallets'],
+                    walletChainType: 'solana-only',
+                  })
+                  
+                  // If connectWallet doesn't throw, check if we got a wallet
+                  setTimeout(() => {
+                    if (!authenticated) {
+                      setStatus('⚠️ Connection timeout. Please ensure Phantom is unlocked and try again.')
+                    }
+                    setIsConnecting(false)
+                  }, 5000)
+                } catch (error: any) {
+                  console.error('Wallet connection error:', error)
+                  setStatus(`❌ Connection failed: ${error.message || 'Please ensure Phantom is installed and unlocked'}`)
+                  setIsConnecting(false)
+                }
+              }}
+              disabled={isConnecting || !ready}
+              style={{
+                padding: '0.75rem 1.5rem',
+                borderRadius: 8,
+                border: 'none',
+                background: isConnecting || !ready 
+                  ? 'rgba(255,255,255,0.3)' 
+                  : 'linear-gradient(90deg, #00dbde, #fc00ff)',
+                color: '#fff',
+                fontWeight: 700,
+                cursor: (isConnecting || !ready) ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {isConnecting ? 'Connecting...' : 'Connect Wallet (Privy)'}
+            </button>
+            {typeof window !== 'undefined' && !(window as any).solana?.isPhantom && (
+              <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', opacity: 0.7, color: '#ffa500' }}>
+                ⚠️ Phantom wallet not detected. Please install Phantom extension.
+              </p>
+            )}
+          </div>
         ) : (
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span style={{ opacity: 0.7 }}>
