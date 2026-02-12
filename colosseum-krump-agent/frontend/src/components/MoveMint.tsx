@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { usePrivy } from '@privy-io/react-auth';
+import { useWallets, useSignTransaction } from '@privy-io/react-auth/solana';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.devnet.solana.com')
@@ -12,6 +13,7 @@ const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID || 'Dp2JcVDt
 export default function MoveMint() {
   const { ready, authenticated, login, logout, user } = usePrivy()
   const { wallets } = useWallets()
+  const { signTransaction } = useSignTransaction()
   const [moveName, setMoveName] = useState('')
   const [videoHash, setVideoHash] = useState('')
   const [royalty, setRoyalty] = useState(5)
@@ -36,10 +38,8 @@ export default function MoveMint() {
 
     try {
       setStatus('Preparing transaction...')
-      const baseWallet = getWallet()
-      if (!baseWallet) throw new Error('Wallet not available')
-      // Privy wallet typing doesn't expose Solana-specific fields, so we cast here.
-      const wallet: any = baseWallet
+      const wallet = getWallet()
+      if (!wallet) throw new Error('Wallet not available (no Solana wallet connected)')
 
       // Derive treasury PDA: seeds = ["treasury"]
       const treasuryPDA = PublicKey.findProgramAddressSync(
@@ -63,8 +63,11 @@ export default function MoveMint() {
       transaction.feePayer = wallet.publicKey
 
       setStatus('Please sign the transaction in your wallet...')
-      const signed = await wallet.signTransaction(transaction)
-      const signature = await connection.sendRawTransaction(signed.serialize())
+      const { signedTransaction } = await signTransaction({
+        transaction,
+        wallet,
+      })
+      const signature = await connection.sendRawTransaction(signedTransaction)
       await connection.confirmTransaction(signature)
 
       setTxSignature(signature)
