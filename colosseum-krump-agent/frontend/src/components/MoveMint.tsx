@@ -22,7 +22,11 @@ export default function MoveMint() {
 
   const getWallet = useCallback(() => {
     if (!wallets || wallets.length === 0) return null
-    return wallets[0]
+    // Filter for Solana wallets only
+    const solanaWallet = wallets.find((w: any) => 
+      w.chainType === 'solana' || w.walletClientType === 'privy' || w.address?.startsWith('So')
+    )
+    return solanaWallet || wallets[0]
   }, [wallets])
 
   const mintMove = useCallback(async () => {
