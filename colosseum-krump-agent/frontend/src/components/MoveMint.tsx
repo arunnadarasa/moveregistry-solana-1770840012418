@@ -41,6 +41,11 @@ export default function MoveMint() {
       const wallet = getWallet()
       if (!wallet) throw new Error('Wallet not available (no Solana wallet connected)')
 
+      // Get wallet address - Privy wallets expose address as a string
+      const walletAddress = (wallet as any).address || (wallet as any).walletClient?.address
+      if (!walletAddress) throw new Error('Could not get wallet address')
+      const fromPubkey = new PublicKey(walletAddress)
+
       // Derive treasury PDA: seeds = ["treasury"]
       const treasuryPDA = PublicKey.findProgramAddressSync(
         [Buffer.from('treasury')],
@@ -52,7 +57,7 @@ export default function MoveMint() {
 
       const transaction = new Transaction().add(
         SystemProgram.transfer({
-          fromPubkey: wallet.publicKey,
+          fromPubkey,
           toPubkey: treasuryPDA,
           lamports: amountLamports,
         })
@@ -60,7 +65,7 @@ export default function MoveMint() {
 
       const { blockhash } = await connection.getLatestBlockhash()
       transaction.recentBlockhash = blockhash
-      transaction.feePayer = wallet.publicKey
+      transaction.feePayer = fromPubkey
 
       setStatus('Please sign the transaction in your wallet...')
       const { signedTransaction } = await signTransaction({
