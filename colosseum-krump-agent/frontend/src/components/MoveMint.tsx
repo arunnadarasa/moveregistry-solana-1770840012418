@@ -122,18 +122,12 @@ export default function MoveMint() {
         {!authenticated ? (
           <button
             onClick={() => {
-              // Try connecting wallet first (for browser extensions), fallback to login
-              if (connectWallet) {
-                connectWallet({
-                  walletList: ['phantom', 'detected_solana_wallets'],
-                  walletChainType: 'solana',
-                }).catch(() => {
-                  // Fallback to login if connectWallet fails
-                  login()
-                })
-              } else {
-                login()
-              }
+              // Use connectWallet for better browser extension detection
+              // This should detect Phantom if installed
+              connectWallet({
+                walletList: ['phantom', 'detected_solana_wallets'],
+                walletChainType: 'solana',
+              })
             }}
             style={{
               padding: '0.75rem 1.5rem',
