@@ -23,11 +23,15 @@ export default function MoveMint() {
 
   const getWallet = useCallback(() => {
     if (!wallets || wallets.length === 0) return null
-    // Filter for Solana wallets only
-    const solanaWallet = wallets.find((w: any) => 
-      w.chainType === 'solana' || w.walletClientType === 'privy' || w.address?.startsWith('So')
-    )
-    return solanaWallet || wallets[0]
+    // Filter for Solana wallets only - check chainType or address format
+    const solanaWallet = wallets.find((w: any) => {
+      const addr = w.address || w.walletClient?.address || ''
+      // Solana addresses are Base58 encoded (no 0x prefix, typically start with letters/numbers)
+      // Ethereum addresses start with 0x
+      return w.chainType === 'solana' || 
+             (addr && !addr.startsWith('0x') && addr.length >= 32 && addr.length <= 44)
+    })
+    return solanaWallet || null
   }, [wallets])
 
   const mintMove = useCallback(async () => {
@@ -49,7 +53,19 @@ export default function MoveMint() {
       // Get wallet address - Privy wallets expose address as a string
       const walletAddress = (wallet as any).address || (wallet as any).walletClient?.address
       if (!walletAddress) throw new Error('Could not get wallet address')
-      const fromPubkey = new PublicKey(walletAddress)
+      
+      // Validate it's a Solana address (not Ethereum 0x format)
+      if (walletAddress.startsWith('0x')) {
+        throw new Error('Please connect a Solana wallet (Phantom Solana, not Ethereum). The connected wallet appears to be an Ethereum wallet.')
+      }
+      
+      // Try to create PublicKey - will throw if not valid Base58
+      let fromPubkey: PublicKey
+      try {
+        fromPubkey = new PublicKey(walletAddress)
+      } catch (e) {
+        throw new Error(`Invalid Solana address: ${walletAddress}. Please ensure you're connected with a Solana wallet.`)
+      }
 
       // Derive treasury PDA: seeds = ["treasury"]
       const treasuryPDA = PublicKey.findProgramAddressSync(
