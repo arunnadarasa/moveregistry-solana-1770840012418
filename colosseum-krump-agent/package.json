@@ -7,7 +7,9 @@
     "update:colosseum": "node update_colosseum.js",
     "test": "echo \"No tests yet\" && exit 0",
     "lint": "echo \"No linting configured\" && exit 0",
-    "security:scan": "node tools/security_railcard.js ."
+    "security:scan": "node tools/security_railcard.js .",
+    "frontend:build": "cd frontend && npm install && npm run build",
+    "frontend:dev": "cd frontend && npm install && npm run dev"
   },
   "keywords": [
     "krump",
