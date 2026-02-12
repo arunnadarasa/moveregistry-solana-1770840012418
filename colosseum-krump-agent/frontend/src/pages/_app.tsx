@@ -13,11 +13,13 @@ export default function App({ Component, pageProps }: AppProps) {
           theme: 'dark',
           accentColor: '#00dbde',
           walletChainType: 'solana-only', // Only show Solana wallets
-          // Prioritize browser extension wallets over QR code
+          // Explicitly list Solana wallets - Phantom should be detected if installed
           walletList: [
-            'detected_solana_wallets', // Show detected browser extensions (Phantom, etc.) first
-            // Optionally exclude QR code: 'wallet_connect_qr_solana' is not included
+            'phantom', // Explicitly include Phantom
+            'detected_solana_wallets', // Show other detected browser extensions
+            // Exclude QR code for cleaner UX on desktop
           ],
+          showWalletLoginFirst: false, // Fix warning: we only have wallet login, so this should be false
         },
         // Configure external Solana wallet connectors
         // Note: solana.rpcs is only needed for embedded wallets, not external ones like Phantom
