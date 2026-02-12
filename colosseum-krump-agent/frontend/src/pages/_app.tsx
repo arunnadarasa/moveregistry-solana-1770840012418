@@ -14,15 +14,8 @@ export default function App({ Component, pageProps }: AppProps) {
           accentColor: '#00dbde',
           walletChainType: 'solana-only', // Only show Solana wallets
         },
-        // Configure Solana support
-        solana: {
-          rpcs: {
-            'solana:devnet': {
-              rpc: 'https://api.devnet.solana.com',
-            },
-          },
-        },
         // Configure external Solana wallet connectors
+        // Note: solana.rpcs is only needed for embedded wallets, not external ones like Phantom
         externalWallets: {
           solana: {
             connectors: toSolanaWalletConnectors(),
