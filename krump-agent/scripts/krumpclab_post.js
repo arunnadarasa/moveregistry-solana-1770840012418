@@ -83,6 +83,7 @@ async function postToMoltbook(content) {
       },
       body: JSON.stringify({
         submolt: 'krumpclaw',
+        title: 'Daily Krump Wisdom',
         content: content
       })
     });
