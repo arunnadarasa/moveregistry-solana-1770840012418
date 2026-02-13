@@ -66,6 +66,27 @@ const krumpFacts = [
 const dailyFactIndex = Math.floor(Date.now() / 86400000) % krumpFacts.length;
 const todaysFact = krumpFacts[dailyFactIndex];
 
+// Check if agent is subscribed to krumpclaw submolt
+async function checkSubscription() {
+  const apiKey = process.env.MOLTBOOK_API_KEY;
+  if (!apiKey) return { subscribed: false, error: 'No API key' };
+
+  try {
+    const response = await fetch('https://www.moltbook.com/api/v1/submolts/krumpclaw', {
+      headers: { 'Authorization': `Bearer ${apiKey}` }
+    });
+    const data = await response.json();
+    if (data.success) {
+      // your_role is null if not a subscriber/moderator
+      const isSubscriber = data.submolt.your_role !== null;
+      return { subscribed: isSubscriber, role: data.submolt.your_role, error: null };
+    }
+    return { subscribed: false, error: data.error || 'Failed to fetch submolt' };
+  } catch (e) {
+    return { subscribed: false, error: e.message };
+  }
+}
+
 // Post to Moltbook
 async function postToMoltbook(content) {
   const apiKey = process.env.MOLTBOOK_API_KEY;
@@ -73,6 +94,16 @@ async function postToMoltbook(content) {
     log('MOLTBOOK_API_KEY not set. Skipping Moltbook post.');
     return { success: false, error: 'No API key' };
   }
+
+  // First, check subscription status
+  const subCheck = await checkSubscription();
+  if (!subCheck.subscribed) {
+    log(`Cannot post: Agent is not a member of krumpclaw submolt (${subCheck.error || 'no role'}).`);
+    log('Action needed: Subscribe via Moltbook UI or API first.');
+    return { success: false, error: 'Not a subscriber', needAction: true };
+  }
+
+  log(`Posting as ${process.env.MOLTBOOK_AGENT_NAME} (role: ${subCheck.role || 'member'})`);
 
   try {
     const response = await fetch('https://www.moltbook.com/api/v1/posts', {
