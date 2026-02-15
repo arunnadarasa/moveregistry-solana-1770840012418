@@ -8,7 +8,7 @@ pub mod move_registry {
     use super::*;
 
     /// Mint a new move NFT. Creates a new mint, a metadata account, and a SkillAccount account.
-    /// The payer must sign and provide a token account for the mint (SystemAccount creates mint).
+    /// UPDATED: The payer (can be a sponsor) pays for account rent. Creator is the skill owner.
     /// The treasury PDA receives a small mint fee.
     pub fn mint_skill(
         ctx: Context<MintMove>,
@@ -95,9 +95,13 @@ pub mod move_registry {
     }
 }
 
-/// Accounts for MintMove
+/// Accounts for MintMove - UPDATED to support sponsored transactions
 #[derive(Accounts)]
 pub struct MintMove<'info> {
+    /// The payer who pays for account rent (can be sponsor/fee payer)
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    /// The creator/owner of the skill (must sign to prove ownership)
     #[account(mut)]
     pub creator: Signer<'info>,
     /// CHECK: This is the mint account for the move NFT (Metaplex)
@@ -109,9 +113,10 @@ pub struct MintMove<'info> {
         bump,
     )]
     pub treasury: SystemAccount<'info>,
+    /// The skill data account - payer pays for rent, not creator
     #[account(
         init,
-        payer = creator,
+        payer = payer,  // CHANGED: payer pays rent instead of creator
         space = 8 + SkillAccount::INIT_SPACE,
         seeds = [b"skilldata", skill_mint.key().as_ref()],
         bump
